@@ -114,5 +114,5 @@ Congratulations! You have successfully integrated the Vanilla OS SDK into
 your Go application and used the `system` package to retrieve and display
 system information. Feel free to explore other packages and functionalities
 provided by the SDK for a more in-depth integration into your projects; each
-package contains a `docs` directory with documentation and each function has
-a docstring that describes its purpose and usage with examples.
+public function in the SDK is documented and offers a detailed description of
+its purpose along with example usage.
