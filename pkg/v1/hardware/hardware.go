@@ -2,6 +2,7 @@ package hardware
 
 import (
 	"bufio"
+	_ "embed"
 	"fmt"
 	"io"
 	"os"
@@ -9,6 +10,9 @@ import (
 
 	"github.com/vanilla-os/sdk/pkg/v1/hardware/types"
 )
+
+//go:embed resources/pci.ids
+var pciIDsData string
 
 var pciDeviceMap types.PCIDeviceMap
 
@@ -272,7 +276,8 @@ func LoadPCIDeviceMap() error {
 
 	pciIDsData, err := os.ReadFile("/usr/share/misc/pci.ids")
 	if err != nil {
-		return fmt.Errorf("error reading /usr/share/misc/pci.ids: %v", err)
+		fmt.Println("Warning: /usr/share/misc/pci.ids not found, using embedded data assuming we are in a development environment.")
+		pciIDsData = []byte(pciIDsData)
 	}
 
 	scanner := bufio.NewScanner(strings.NewReader(string(pciIDsData)))
