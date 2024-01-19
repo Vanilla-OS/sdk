@@ -1,4 +1,4 @@
-# Introduction
+# Vanilla OS SDK Documentation
 
 Welcome to the documentation for the Vanilla OS SDK! This guide aims to provide
 developers with guidelines and best practices for developing with the SDK.
