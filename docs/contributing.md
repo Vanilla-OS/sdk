@@ -13,7 +13,10 @@ criteria:
    Is the feature likely to be reused by multiple applications or components?
 - **Dependency Management:**\
    Does the feature introduce new dependencies? Minimize dependencies to keep
-  the SDK lightweight.
+  the SDK lightweight. If the feature is considered relevant to the SDK but
+  adds extra depedencies, please open an issue with your suggestion so the
+  maintainers can decide whether it should be implemented. This will avoid
+  unnecessary work that may not be merged.
 
 ## Package Structure
 
@@ -21,7 +24,14 @@ When developing a new feature, it is important to choose the right package
 within the SDK. Follow these guidelines:
 
 - **Logical Grouping:**\
-   Group related functionalities together to provide a clear structure.
+   Group related functionalities together to provide a clear structure, for
+  example, the `system` package contains functions for interacting with the
+  system in many ways, such as managing processes, users etc., we are not
+  placing all the functions in the same file, but we are grouping them in
+  multiple files, for example, the `system` package contains the following
+  files: `proc.go`, `user.go` and so on, this provides a clear structure
+  and makes it easier to find the functions you are looking for by looking
+  at the package structure.
 - **Avoid Overcrowding:**\
    If a package becomes too large, consider breaking it into sub-packages
   for better organization, but keep the structure as flat as possible.
@@ -53,6 +63,18 @@ Follow these naming conventions to ensure consistency and readability:
   want to use abbreviations for long names, you are probably using the wrong
   name and it's worth considering stepping back and rethinking the logic.
 
+## Code Formatting
+
+A clear and consistent code formatting style is essential for readability and
+maintainability. Follow these guidelines:
+
+- **Formatting:**\
+   Use the in-built `gofmt` tool to format the code, for example:
+
+  ```bash
+  gofmt -w .
+  ```
+
 ## Documentation Standards
 
 Consistent and comprehensive documentation is essential for developers using
@@ -63,6 +85,9 @@ the SDK. Follow these documentation standards:
   remember to keep the descriptions up-to-date when making changes.
 - **Examples:**\
    Include usage examples to demonstrate how to use different features.
+
+Please refer to the [Go Doc Comments](https://go.dev/doc/comment) for more
+information on how to write documentation comments.
 
 ## Testing Practices
 
