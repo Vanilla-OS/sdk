@@ -98,7 +98,11 @@ Follow these guidelines:
   unlikely to occur.
 - **Return errors:**\
    Return errors to the caller instead of logging them, so that the caller
-  can decide how to handle them.
+  can decide how to handle them. In case a function is changing its behavior
+  due to an error (e.g. using a built-in file if the host file is not found),
+  it should return a simple message with the comment `// @sdk:hint` before
+  the message, so that it is easy to track. See an example in the
+  `pkg/v1/hardware/hardware.go (LoadPCIDeviceMap)` function.
 - **Provide context:**\
    Provide context when returning errors, for example, if a function fails
   to open a file, return an error with a message like "failed to open file

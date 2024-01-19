@@ -276,6 +276,7 @@ func LoadPCIDeviceMap() error {
 
 	pciIDsData, err := os.ReadFile("/usr/share/misc/pci.ids")
 	if err != nil {
+		// @sdk:hint
 		fmt.Println("Warning: /usr/share/misc/pci.ids not found, using embedded data assuming we are in a development environment.")
 		pciIDsData = []byte(pciIDsData)
 	}
