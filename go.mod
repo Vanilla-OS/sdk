@@ -3,6 +3,7 @@ module github.com/vanilla-os/sdk
 go 1.21.1
 
 require (
+	github.com/godbus/dbus v4.1.0+incompatible
 	github.com/sergi/go-diff v1.3.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/stretchr/testify v1.8.4
