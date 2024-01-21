@@ -17,14 +17,20 @@ type NotificationAction struct {
 }
 
 // NewNotification creates a new Notification instance.
-func NewNotification(appName, title, message, icon string, timeout int32, action NotificationAction) *Notification {
+func NewNotification(appName, title, message, icon string, timeout int32, action ...NotificationAction) *Notification {
+	var notificationAction NotificationAction
+
+	if len(action) > 0 {
+		notificationAction = action[0]
+	}
+
 	return &Notification{
 		AppName: appName,
 		Title:   title,
 		Message: message,
 		Icon:    icon,
 		Timeout: timeout,
-		Action:  action,
+		Action:  notificationAction,
 	}
 }
 

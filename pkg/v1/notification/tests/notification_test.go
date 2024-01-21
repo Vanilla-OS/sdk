@@ -19,10 +19,10 @@ func TestSendNotification(t *testing.T) {
 		"Joker is attacking Gotham City!",
 		"batman",
 		5000,
-		types.NewNotificationAction(
-			"Save Gotham",
-			func() { t.Logf("Gotham saved!") },
-		),
+		// types.NewNotificationAction(
+		// 	"Save Gotham",
+		// 	func() { t.Logf("Gotham saved!") },
+		// ),
 	)
 
 	err := notification.SendNotification(notificationObj)

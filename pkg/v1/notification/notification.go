@@ -57,6 +57,10 @@ func SendNotification(notification *types.Notification) error {
 		return err
 	}
 
+	if notification.Action.Callback == nil {
+		return nil
+	}
+
 	// We need to listen for the ActionInvoked signal to know if the user
 	// clicked on the notification action
 	c := make(chan *dbus.Signal, 10)
