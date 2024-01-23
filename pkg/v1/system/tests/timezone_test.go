@@ -12,8 +12,12 @@ func TestGetSupportedTimezones(t *testing.T) {
 		t.Errorf("Error: %v", err)
 		return
 	}
-	for _, timezone := range timezones {
+	for i, timezone := range timezones {
 		t.Logf("%s\n", timezone.Name)
 		t.Logf("%s\n", timezone.Location)
+
+		if i == 5 {
+			break
+		}
 	}
 }
