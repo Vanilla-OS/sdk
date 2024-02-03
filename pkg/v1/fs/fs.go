@@ -126,6 +126,11 @@ func GetFile(filePath string, fullPath bool) (types.FileInfo, error) {
 }
 
 // GetFileExtension returns the extension of the given file
+//
+// Example:
+//
+//	extension := fs.GetFileExtension("/batmans/cave/batmobile.txt")
+//	fmt.Printf("Extension: %s\n", extension)
 func GetFileExtension(filePath string) string {
 	ext := filepath.Ext(filePath)
 	if ext != "" {
@@ -135,6 +140,12 @@ func GetFileExtension(filePath string) string {
 }
 
 // IsFile checks whether the given path is a regular file
+//
+// Example:
+//
+//	if fs.IsFile("/batmans/cave/batmobile.txt") {
+//		fmt.Println("It's a file!")
+//	}
 func IsFile(filePath string) bool {
 	info, err := os.Stat(filePath)
 	if err != nil {
@@ -144,6 +155,12 @@ func IsFile(filePath string) bool {
 }
 
 // IsDirectory checks whether the given path is a directory
+//
+// Example:
+//
+//	if fs.IsDirectory("/batmans/cave") {
+//		fmt.Println("It's a directory!")
+//	}
 func IsDirectory(dirPath string) bool {
 	info, err := os.Stat(dirPath)
 	if err != nil {
@@ -153,6 +170,11 @@ func IsDirectory(dirPath string) bool {
 }
 
 // GetFileSize returns the size of the specified file in bytes
+//
+// Example:
+//
+//	size := fs.GetFileSize("/batmans/cave/batmobile.txt")
+//	fmt.Printf("Size: %d\n", size)
 func GetFileSize(filePath string) int64 {
 	info, err := os.Stat(filePath)
 	if err != nil {
@@ -162,6 +184,14 @@ func GetFileSize(filePath string) int64 {
 }
 
 // WriteFileContent writes content to the specified file
+//
+// Example:
+//
+//	err := fs.WriteFileContent("/tmp/batman", "I'm Batman!")
+//	if err != nil {
+//		fmt.Printf("Error writing file content: %v", err)
+//		return
+//	}
 func WriteFileContent(filePath, content string) error {
 	err := os.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
@@ -170,19 +200,43 @@ func WriteFileContent(filePath, content string) error {
 	return nil
 }
 
-// FileExists checks if a file exists.
+// FileExists checks if a file exists
+//
+// Example:
+//
+//	if fs.FileExists("/tmp/batman") {
+//		fmt.Println("The file exists!")
+//	}
 func FileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return err == nil
 }
 
-// DirectoryExists checks if a directory exists.
+// DirectoryExists checks if a directory exists
+//
+// Example:
+//
+//	if fs.DirectoryExists("/tmp/batman") {
+//		fmt.Println("The directory exists!")
+//	}
 func DirectoryExists(directoryPath string) bool {
 	fileInfo, err := os.Stat(directoryPath)
 	return err == nil && fileInfo.IsDir()
 }
 
-// ListDirectories returns a list of directories in the specified directory.
+// ListDirectories returns a list of directories in the specified directory
+//
+// Example:
+//
+//	directories, err := fs.ListDirectories("/tmp")
+//	if err != nil {
+//		fmt.Printf("Error: %v\n", err)
+//		return
+//	}
+//
+//	for _, directory := range directories {
+//		fmt.Printf("Directory: %s\n", directory)
+//	}
 func ListDirectories(directoryPath string) ([]string, error) {
 	var directories []string
 	files, err := os.ReadDir(directoryPath)
