@@ -90,7 +90,9 @@ func GetAllUsers(includeNoLogin bool) ([]types.UserInfo, error) {
 //		fmt.Printf("Username: %s\n", user.Username)
 //	}
 //
-// Note: if a username and UID refer to the same user, the user will only be
+// Notes:
+//
+// if a username and UID refer to the same user, the user will only be
 // returned once. If an user does not match any of the given usernames or UIDs,
 // it will not be available in the returned map.
 func GetUsers(usernames []string, uids []string, useUID bool) map[string]types.UserInfo {

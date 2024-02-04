@@ -146,7 +146,9 @@ func ResolveIPAddress(hostname string) (string, error) {
 //		fmt.Println("Internet connectivity is not available")
 //	}
 //
-// Note: this function is a simple wrapper around ResolveIPAddress().
+// Notes:
+//
+// this function is a simple wrapper around ResolveIPAddress().
 func CheckInternetConnectivity() bool {
 	_, err := ResolveIPAddress("8.8.8.8")
 	return err == nil
@@ -291,7 +293,9 @@ func CheckPortStatus(host string, port int) types.PortStatus {
 //
 //	fmt.Printf("Default gateway: %s\n", gateway)
 //
-// Note: this function relies on the 'ip' command
+// Notes:
+//
+// this function relies on the 'ip' command
 func GetDefaultGateway() (string, error) {
 	routes, err := net.InterfaceAddrs()
 	if err != nil {

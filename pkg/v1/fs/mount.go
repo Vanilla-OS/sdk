@@ -43,9 +43,10 @@ func IsMounted(source string, destination string) (bool, error) {
 // creates the destination path if it does not exist. An error is returned if
 // the source path does not exist.
 //
-// NOTE: (for developers) Avoid mapping the fsType into a custom type, as it
-// would require further maintenance once a new filesystem type is added to
-// Vanilla OS.
+// Notes (for developers):
+//
+// Avoid mapping the fsType into a custom type, as it would require further
+// maintenance once a new filesystem type is added to Vanilla OS.
 //
 // Example:
 //
@@ -73,7 +74,9 @@ func Mount(source, destination, fsType, data string, mode uintptr) error {
 
 // MountBind mounts bind the given source path in the given destination path.
 //
-// NOTE: This is just a wrapper of the Mount function, for convenience.
+// Notes:
+//
+// This is just a wrapper of the Mount function, for convenience.
 //
 // Example:
 //
@@ -101,7 +104,9 @@ func MountBind(src, dest string) error {
 // MountOverlay mounts the given lower, upper and work directories in the
 // given destination path as an overlay filesystem.
 //
-// NOTE: This is just a wrapper of the Mount function, for convenience.
+// Notes:
+//
+// This is just a wrapper of the Mount function, for convenience.
 //
 // Example:
 //
@@ -126,10 +131,10 @@ func MountOverlay(lowerDir, upperDir, workDir string) error {
 // MountFuseOverlay mounts the given lower, upper and work directories in the
 // given destination path as an overlay filesystem using fuse-overlayfs.
 //
-// NOTE: This implementation uses the fuse-overlayfs command-line tool, if that
-// is not available in the system, this function will return an error.
+// Notes:
 //
-// TODO: Replace the command-line tool with a Go library, if available.
+// This implementation uses the fuse-overlayfs command-line tool, if that
+// is not available in the system, this function will return an error.
 //
 // Example:
 //
@@ -139,6 +144,7 @@ func MountOverlay(lowerDir, upperDir, workDir string) error {
 //		return
 //	}
 func MountFuseOverlay(targetDir, lowerDir, upperDir, workDir string) (err error) {
+	// TODO: Replace the command-line tool with a Go library, if available.
 	c := exec.Command(
 		"fuse-overlayfs",
 		targetDir,
@@ -170,10 +176,10 @@ func Unmount(target string) error {
 // UnmountFuseOverlay unmounts the given path using the fuse-overlayfs command-
 // line tool. An error is returned if the path is not mounted.
 //
-// NOTE: This implementation uses the fuse-overlayfs command-line tool, if that
-// is not available in the system, this function will return an error.
+// Notes:
 //
-// TODO: Replace the command-line tool with a Go library, if available.
+// This implementation uses the fuse-overlayfs command-line tool, if that
+// is not available in the system, this function will return an error.
 //
 // Example:
 //
@@ -183,6 +189,7 @@ func Unmount(target string) error {
 //		return
 //	}
 func UnmountFuseOverlay(targetDir string) (err error) {
+	// TODO: Replace the command-line tool with a Go library, if available.
 	c := exec.Command("fusermount", "-u", targetDir)
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr

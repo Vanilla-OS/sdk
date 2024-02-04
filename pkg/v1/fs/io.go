@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-// NOTE:
+// Notes:
 // 	Why do we provide those wrappers?
 //	We provide wrappers for built-in functions for two primary reasons:
 //		1. To provide a standard interface for common operations, making

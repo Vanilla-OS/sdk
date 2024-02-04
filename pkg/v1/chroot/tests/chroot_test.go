@@ -11,7 +11,7 @@ import (
 	"github.com/vanilla-os/sdk/pkg/v1/chroot"
 )
 
-// Note: this function tests both EnterChroot, ExitChroot and RunChroot, so
+// This function tests both EnterChroot, ExitChroot and RunChroot, so
 // there is no need to test them separately.
 func TestRunChroot(t *testing.T) {
 	// Skip the test if not running as root

@@ -270,7 +270,9 @@ func readSysFile(devicePath, fileName string) (string, error) {
 //	  return
 //	}
 //
-// Note: Subdevice is not supported yet.
+// Notes:
+//
+// Subdevice is not supported yet.
 func LoadPCIDeviceMap() error {
 	pciDeviceMap = make(types.PCIDeviceMap, 0)
 
