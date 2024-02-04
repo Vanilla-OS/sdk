@@ -18,7 +18,7 @@ func getLogPath() (string, error) {
 	var logPath string
 
 	// if running as root, we should use /var/vlogs/, while users should store
-	// logs in their home directory (e.g. ~/vlogs)
+	// logs in their home directory (e.g. ~/.vlogs)
 	if os.Geteuid() == 0 {
 		logPath = "/var/vlogs/"
 	} else {
