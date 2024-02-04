@@ -4,6 +4,8 @@ go 1.21.1
 
 require (
 	github.com/godbus/dbus v4.1.0+incompatible
+	github.com/phuslu/log v1.0.88
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/sergi/go-diff v1.3.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/stretchr/testify v1.8.4
