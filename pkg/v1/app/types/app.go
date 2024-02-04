@@ -1,7 +1,10 @@
 package types
 
 import (
+	"embed"
+
 	logsTypes "github.com/vanilla-os/sdk/pkg/v1/logs/types"
+	"github.com/vorlif/spreak"
 )
 
 // AppOptions contains options for creating a new Vanilla OS application
@@ -16,6 +19,14 @@ type AppOptions struct {
 
 	// Version is the version of the application
 	Version string
+
+	// LocalesFS is the file system containing the locales for the application
+	LocalesFS embed.FS
+
+	// DefaultLocale is the default locale for the application, this should
+	// always be empty unless you want to force a specific locale for the
+	// application, for example for testing purposes.
+	DefaultLocale string
 }
 
 // App represents a Vanilla OS application
@@ -34,4 +45,10 @@ type App struct {
 
 	// Logger is the logger for the application
 	Logger logsTypes.Logger
+
+	// LC (Localizer) is the localizer for the application
+	LC spreak.Localizer
+
+	// LocalesFS is the file system containing the locales for the application
+	LocalesFS embed.FS
 }

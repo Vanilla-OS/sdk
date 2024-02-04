@@ -9,7 +9,9 @@ require (
 	github.com/sergi/go-diff v1.3.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/stretchr/testify v1.8.4
+	github.com/vorlif/spreak v0.6.0
 	golang.org/x/sys v0.16.0
+	golang.org/x/text v0.14.0
 )
 
 require (
