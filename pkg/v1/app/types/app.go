@@ -1,5 +1,9 @@
 package types
 
+import (
+	logsTypes "github.com/vanilla-os/sdk/pkg/v1/logs/types"
+)
+
 // AppOptions contains options for creating a new Vanilla OS application
 type AppOptions struct {
 	// RDNN is the reverse domain name notation of the application, please
@@ -27,4 +31,7 @@ type App struct {
 
 	// Version is the version of the application
 	Version string
+
+	// Logger is the logger for the application
+	Logger logsTypes.Logger
 }

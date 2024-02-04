@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/vanilla-os/sdk/pkg/v1/app/types"
+	"github.com/vanilla-os/sdk/pkg/v1/logs"
 )
 
 // NewApp creates a new Vanilla OS application, which can be used to
@@ -31,6 +32,12 @@ func NewApp(options types.AppOptions) (*types.App, error) {
 		Version: options.Version,
 	}
 	app.Sign = generateAppSign(app)
+
+	logger, err := logs.NewLogger(app)
+	if err != nil {
+		return nil, err
+	}
+	app.Logger = logger
 
 	return app, nil
 }
