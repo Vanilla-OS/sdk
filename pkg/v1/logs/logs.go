@@ -14,11 +14,12 @@ import (
 	logsTypes "github.com/vanilla-os/sdk/pkg/v1/logs/types"
 )
 
+// getLogPath returns the path to the log directory, if the user is running as
+// root, the logs will be stored in /var/vlogs/, otherwise the logs will be
+// stored in ~/.vlogs.
 func getLogPath() (string, error) {
 	var logPath string
 
-	// if running as root, we should use /var/vlogs/, while users should store
-	// logs in their home directory (e.g. ~/.vlogs)
 	if os.Geteuid() == 0 {
 		logPath = "/var/vlogs/"
 	} else {
