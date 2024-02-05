@@ -95,15 +95,15 @@ func readOSRelease() (*types.OSReleaseInfo, error) {
 // getMachineType returns the machine type, which can be BareMetal, VM or
 // Container. If any error occurs, it will be returned.
 func getMachineType() (types.MachineType, error) {
+	// Check if /run/.containerenv file exists
+	if _, err := os.Stat("/run/.containerenv"); err == nil {
+		return types.Container, nil
+	}
+
 	// Check if hypervisor information is present in /proc/cpuinfo
 	cpuInfo, err := os.ReadFile("/proc/cpuinfo")
 	if err == nil && strings.Contains(string(cpuInfo), "hypervisor") {
 		return types.VM, nil
-	}
-
-	// Check if /run/.containerenv file exists
-	if _, err := os.Stat("/run/.containerenv"); err == nil {
-		return types.Container, nil
 	}
 
 	// No clear indication of VM or Container, assuming BareMetal
