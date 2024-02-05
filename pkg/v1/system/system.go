@@ -95,8 +95,16 @@ func readOSRelease() (*types.OSReleaseInfo, error) {
 // getMachineType returns the machine type, which can be BareMetal, VM or
 // Container. If any error occurs, it will be returned.
 func getMachineType() (types.MachineType, error) {
+	// There are many ways to check if the system is running in a container,
+	// we have to check multiple methods to be sure.
+
 	// Check if /run/.containerenv file exists
 	if _, err := os.Stat("/run/.containerenv"); err == nil {
+		return types.Container, nil
+	}
+
+	// Check if /.dockerenv file exists
+	if _, err := os.Stat("/.dockerenv"); err == nil {
 		return types.Container, nil
 	}
 
