@@ -109,3 +109,75 @@ func getMachineType() (types.MachineType, error) {
 	// No clear indication of VM or Container, assuming BareMetal
 	return types.BareMetal, nil
 }
+
+// RunningInVM returns true if the system is running in a virtual machine,
+// otherwise it returns false.
+//
+// Example:
+//
+//	if system.RunningInVM() {
+//		fmt.Println("Running in a virtual machine")
+//	} else {
+//		fmt.Println("Not running in a virtual machine")
+//	}
+func RunningInVM() bool {
+	info, err := getMachineType()
+	if err != nil {
+		return false
+	}
+	return info == types.VM
+}
+
+// RunningInContainer returns true if the system is running in a container,
+// otherwise it returns false.
+//
+// Example:
+//
+//	if system.RunningInContainer() {
+//		fmt.Println("Running in a container")
+//	} else {
+//		fmt.Println("Not running in a container")
+//	}
+func RunningInContainer() bool {
+	info, err := getMachineType()
+	if err != nil {
+		return false
+	}
+	return info == types.Container
+}
+
+// RunningInBareMetal returns true if the system is running on bare metal,
+// otherwise it returns false.
+//
+// Example:
+//
+//	if system.RunningInBareMetal() {
+//		fmt.Println("Running on bare metal")
+//	} else {
+//		fmt.Println("Not running on bare metal")
+//	}
+func RunningInBareMetal() bool {
+	info, err := getMachineType()
+	if err != nil {
+		return false
+	}
+	return info == types.BareMetal
+}
+
+// RunningInVMOrContainer returns true if the system is running in a virtual
+// machine or a container, otherwise it returns false.
+//
+// Example:
+//
+//	if system.RunningInVMOrContainer() {
+//		fmt.Println("Running in a virtual machine or a container")
+//	} else {
+//		fmt.Println("Not running in a virtual machine or a container")
+//	}
+func RunningInVMOrContainer() bool {
+	info, err := getMachineType()
+	if err != nil {
+		return false
+	}
+	return info == types.VM || info == types.Container
+}
