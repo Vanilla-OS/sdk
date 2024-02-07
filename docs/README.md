@@ -22,3 +22,7 @@ document.
 
 If you want to contribute to the SDK, check out the [Contributing](contributing.md)
 document.
+
+## References
+
+Read the [Reference Documentation](https://sdk.vanillaos.org/references).
