@@ -11,7 +11,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run tests
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.21
+
+      - name: Install godoc2md
+        run: |
+          go get github.com/gideaworx/godoc2md
+          go install github.com/gideaworx/godoc2md
+
+      - name: Generate Docs
         run: sh scripts/gen-docs.sh
 
       - name: Setup Pages
