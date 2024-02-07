@@ -3,8 +3,13 @@
 prefix="github.com/vanilla-os/sdk"
 versions=$(ls pkg)
 
+mkdir -p docs/references
+echo "# Vanilla OS SDK References\n" > docs/references/README.md
+
 # Generate references for each module
 for pkg_version in $versions; do
+  echo "- [$pkg_version](/references/$pkg_version/README.md)" >> docs/references/README.md
+
   modules=$(ls pkg/$pkg_version)
 
   mkdir -p docs/references/$pkg_version
