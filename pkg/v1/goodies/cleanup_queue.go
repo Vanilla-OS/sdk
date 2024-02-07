@@ -49,7 +49,7 @@ type CleanupTask struct {
 	Task                      func(args ...interface{}) error
 	Args                      []interface{}
 	ErrorHandler              ErrorHandler
-	IgnoreErrorHandlerFailure bool // Flag to ignore error handler failure
+	IgnoreErrorHandlerFailure bool
 	index                     int
 }
 
