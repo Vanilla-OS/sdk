@@ -8,7 +8,7 @@ echo "# Vanilla OS SDK References\n" > docs/references/README.md
 
 # Generate references for each module
 for pkg_version in $versions; do
-  echo "- [$pkg_version](/references/$pkg_version/README.md)" >> docs/references/README.md
+  echo "- [$pkg_version](/references/$pkg_version/)" >> docs/references/README.md
 
   modules=$(ls pkg/$pkg_version)
 
@@ -23,6 +23,6 @@ for pkg_version in $versions; do
     echo "Generating refs for $prefix/pkg/$pkg_version/$module"
     godoc2md $prefix/pkg/$pkg_version/$module > docs/references/$pkg_version/$module.md
 
-    echo "- [$module](/references/$pkg_version/$module.md)" >> docs/references/$pkg_version/README.md
+    echo "- [$module](/references/$pkg_version/$module)" >> docs/references/$pkg_version/README.md
   done
 done
