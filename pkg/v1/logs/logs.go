@@ -2,6 +2,7 @@ package logs
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +12,20 @@ import (
 	"github.com/phuslu/log"
 	"github.com/robfig/cron/v3"
 	logsTypes "github.com/vanilla-os/sdk/pkg/v1/logs/types"
+)
+
+// Color codes for different log levels
+const (
+	Reset   = "\x1b[0m"
+	Black   = "\x1b[30m"
+	Red     = "\x1b[31m"
+	Green   = "\x1b[32m"
+	Yellow  = "\x1b[33m"
+	Blue    = "\x1b[34m"
+	Magenta = "\x1b[35m"
+	Cyan    = "\x1b[36m"
+	White   = "\x1b[37m"
+	Gray    = "\x1b[90m"
 )
 
 // getLogPath returns the path to the log directory, if the user is running as
@@ -101,15 +116,46 @@ func NewLogger(domain string) (logsTypes.Logger, error) {
 	go runner.Run()
 
 	// preparing the console logger
-	vLogger.Console = log.Logger{
+	vLogger.Term = log.Logger{
 		TimeFormat: "15:04:05",
 		Caller:     1,
 		Writer: &log.ConsoleWriter{
-			ColorOutput:    true,
-			QuoteString:    true,
+			Formatter:      formatLog,
 			EndWithMessage: true,
 		},
 	}
 
 	return vLogger, nil
+}
+
+// formatLog formats the log message with appropriate colors for log level
+func formatLog(w io.Writer, a *log.FormatterArgs) (int, error) {
+	var color, three string
+
+	// Determine color and abbreviation for log level
+	switch a.Level {
+	case "trace":
+		color, three = Magenta, "TRC"
+	case "debug":
+		color, three = Yellow, "DBG"
+	case "info":
+		color, three = Green, "INF"
+	case "warn":
+		color, three = Red, "WRN"
+	case "error":
+		color, three = Red, "ERR"
+	case "fatal":
+		color, three = Red, "FTL"
+	case "panic":
+		color, three = Red, "PNC"
+	default:
+		color, three = Gray, "???"
+	}
+
+	// Format the log message
+	formattedLog := fmt.Sprintf("%s%s%s ", color, three, Reset)
+	formattedLog += fmt.Sprintf("%s>%s", Cyan, Reset)
+	formattedLog += fmt.Sprintf(" %s\n", a.Message)
+
+	return fmt.Fprint(w, formattedLog)
 }

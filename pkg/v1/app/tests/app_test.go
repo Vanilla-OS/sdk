@@ -26,6 +26,6 @@ func TestNewApp(t *testing.T) {
 	t.Logf("\tName: %s\n", app.Name)
 	t.Logf("\tVersion: %s\n", app.Version)
 	t.Logf("\tTesting bundled logger:")
-	app.Logger.File.Info().Msg("Robin reached the file logger")
-	app.Logger.Console.Info().Msg("Robin reached the console logger")
+	app.Log.File.Info().Msg("Robin reached the file logger")
+	app.Log.Term.Info().Msg("Robin reached the console logger")
 }

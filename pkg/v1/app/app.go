@@ -29,8 +29,8 @@ type App struct {
 	// Version is the version of the application
 	Version string
 
-	// Logger is the logger for the application
-	Logger logsTypes.Logger
+	// Log is the logger for the application
+	Log logsTypes.Logger
 
 	// LC (Localizer) is the localizer for the application
 	LC spreak.Localizer
@@ -77,20 +77,20 @@ type App struct {
 //	}
 //	fmt.Printf("App Sign: %s\n", app.Sign)
 func NewApp(options types.AppOptions) (*App, error) {
-	app := &App{
+	app := App{
 		RDNN:      options.RDNN,
 		Name:      options.Name,
 		Version:   options.Version,
 		LocalesFS: options.LocalesFS,
 	}
-	app.Sign = generateAppSign(app)
+	app.Sign = generateAppSign(&app)
 
 	// here we prepare a logger for the application
 	logger, err := logs.NewLogger(string(app.Sign))
 	if err != nil {
-		return nil, err // logger is mandatory for each application
+		return &app, err // logger is mandatory for each application
 	}
-	app.Logger = logger
+	app.Log = logger
 
 	// here we prepare a localizer for the application
 	localizer, err := i18n.NewLocalizer(options.LocalesFS, app.RDNN, options.DefaultLocale)
@@ -98,7 +98,7 @@ func NewApp(options types.AppOptions) (*App, error) {
 		app.LC = *localizer
 	} // something went wrong, perhaps the FS is not provided
 
-	return app, nil
+	return &app, nil
 }
 
 // WithCLI adds a command line interface to the application

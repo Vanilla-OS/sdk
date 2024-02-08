@@ -26,7 +26,7 @@ func TestNewLogger(t *testing.T) {
 	}
 
 	logger.File.Info().Msg("Batman reached the file logger")
-	logger.Console.Info().Msg("Batman reached the console logger")
+	logger.Term.Info().Msg("Batman reached the console logger")
 
 	logger.File.Info().Str("where", "file").Msg("Batman is saving Gotham")
 }
