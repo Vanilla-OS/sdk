@@ -68,30 +68,28 @@ func startPoll(cmd *cobra.Command, args []string) error {
 	case "Robin":
 		myApp.Log.Term.Info().Msg("Nobody likes Robin.")
 	case "None":
-		myApp.Log.Term.Info().Msg("You don't like any hero?")
-	}
-
-	// Let's ask if they want to pick an unlisted hero
-	confirm, err := myApp.CLI.ConfirmAction(
-		"Do you want to pick an unlisted hero?",
-		"Y", "n",
-		true,
-	)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	if confirm {
-		hero, err := myApp.CLI.PromptText(
-			"Enter your preferred hero",
-			"Batman",
+		// Let's ask if they want to pick an unlisted hero
+		confirm, err := myApp.CLI.ConfirmAction(
+			"Do you want to pick an unlisted hero?",
+			"Y", "n",
+			true,
 		)
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
-		myApp.Log.Term.Info().Msgf("You picked %s", hero)
+
+		if confirm {
+			hero, err := myApp.CLI.PromptText(
+				"Enter your preferred hero",
+				"Batman",
+			)
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+			myApp.Log.Term.Info().Msgf("You picked %s", hero)
+		}
 	}
 
 	return nil
