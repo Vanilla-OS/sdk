@@ -10,7 +10,6 @@ import (
 
 	"github.com/phuslu/log"
 	"github.com/robfig/cron/v3"
-	"github.com/vanilla-os/sdk/pkg/v1/app/types"
 	logsTypes "github.com/vanilla-os/sdk/pkg/v1/logs/types"
 )
 
@@ -60,7 +59,7 @@ func getLogPath() (string, error) {
 //
 //	logger.File.Info().Str("where", "file").Msg("Batman is saving Gotham")
 //	logger.Console.Info().Str("where", "console").Msg("Batman is saving Gotham")
-func NewLogger(app *types.App) (logsTypes.Logger, error) {
+func NewLogger(domain string) (logsTypes.Logger, error) {
 	vLogger := logsTypes.Logger{}
 
 	// preparing the file logger
@@ -69,7 +68,7 @@ func NewLogger(app *types.App) (logsTypes.Logger, error) {
 		return vLogger, err
 	}
 
-	vLogFile := filepath.Join(logPath, app.Sign, "log.json")
+	vLogFile := filepath.Join(logPath, domain, "log.json")
 
 	vLogger.File = log.Logger{
 		Level: log.ParseLevel("info"),

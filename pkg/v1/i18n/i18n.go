@@ -1,10 +1,9 @@
 package i18n
 
 import (
+	"embed"
 	"fmt"
 	"strings"
-
-	appTypes "github.com/vanilla-os/sdk/pkg/v1/app/types"
 
 	"github.com/vorlif/spreak"
 	"golang.org/x/text/language"
@@ -24,7 +23,7 @@ import (
 //		return
 //	}
 //	fmt.Println(t.Get("I am Batman!"))
-func NewLocalizer(app *appTypes.App, locale string) (*spreak.Localizer, error) {
+func NewLocalizer(localeFS embed.FS, defaultDomain string, locale string) (*spreak.Localizer, error) {
 	foundLocale, err := language.Parse(locale)
 	if err != nil {
 		foundLocale = language.English
@@ -32,7 +31,7 @@ func NewLocalizer(app *appTypes.App, locale string) (*spreak.Localizer, error) {
 
 	// we need to get the supported languages from the locales file system
 	// to do so we expect a LINGUAS file to be present
-	linguas, err := app.LocalesFS.ReadFile("locales/LINGUAS")
+	linguas, err := localeFS.ReadFile("locales/LINGUAS")
 	if err != nil {
 		return nil, fmt.Errorf("no LINGUAS file found: %v", err)
 	}
@@ -50,8 +49,8 @@ func NewLocalizer(app *appTypes.App, locale string) (*spreak.Localizer, error) {
 	// as the default localizer domain
 	bundle, err := spreak.NewBundle(
 		spreak.WithSourceLanguage(language.English),
-		spreak.WithDefaultDomain(app.RDNN),
-		spreak.WithDomainFs(app.RDNN, app.LocalesFS),
+		spreak.WithDefaultDomain(defaultDomain),
+		spreak.WithDomainFs(defaultDomain, localeFS),
 		spreak.WithRequiredLanguage(foundLocale),
 		spreak.WithLanguage(supportedLanguages...),
 	)

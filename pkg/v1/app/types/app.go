@@ -3,9 +3,11 @@ package types
 import (
 	"embed"
 
-	logsTypes "github.com/vanilla-os/sdk/pkg/v1/logs/types"
-	"github.com/vorlif/spreak"
+	cliTypes "github.com/vanilla-os/sdk/pkg/v1/cli/types"
 )
+
+// Sign is a unique signature for the application
+type Sign string
 
 // AppOptions contains options for creating a new Vanilla OS application
 type AppOptions struct {
@@ -27,28 +29,7 @@ type AppOptions struct {
 	// always be empty unless you want to force a specific locale for the
 	// application, for example for testing purposes.
 	DefaultLocale string
-}
 
-// App represents a Vanilla OS application
-type App struct {
-	// Sign is a unique signature for the application
-	Sign string
-
-	// RDNN is the reverse domain name notation of the application
-	RDNN string
-
-	// Name is the name of the application
-	Name string
-
-	// Version is the version of the application
-	Version string
-
-	// Logger is the logger for the application
-	Logger logsTypes.Logger
-
-	// LC (Localizer) is the localizer for the application
-	LC spreak.Localizer
-
-	// LocalesFS is the file system containing the locales for the application
-	LocalesFS embed.FS
+	// CLIOptions contains options for creating the command line interface
+	CLIOptions *cliTypes.CLIOptions
 }

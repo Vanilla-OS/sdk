@@ -19,11 +19,12 @@ func TestNewLogger(t *testing.T) {
 		return
 	}
 
-	logger, err := logs.NewLogger(app)
+	logger, err := logs.NewLogger(string(app.Sign))
 	if err != nil {
 		t.Errorf("Error: %v", err)
 		return
 	}
+
 	logger.File.Info().Msg("Batman reached the file logger")
 	logger.Console.Info().Msg("Batman reached the console logger")
 
