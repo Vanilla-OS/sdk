@@ -2,96 +2,40 @@ package cli
 
 import (
 	"fmt"
-	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
+	"github.com/AlecAivazis/survey/v2"
 )
 
-type confirmModel struct {
-	prompt        string
-	yesText       string
-	noText        string
-	defaultChoice bool
-	choice        *bool
-}
-
-func (m *confirmModel) Init() tea.Cmd {
-	return nil
-}
-
-func (m *confirmModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "esc", "ctrl+c":
-			return m, tea.Quit
-		case "y":
-			trueChoice := true
-			m.choice = &trueChoice
-			return m, tea.Quit
-		case "n":
-			falseChoice := false
-			m.choice = &falseChoice
-			return m, tea.Quit
-		case "enter":
-			// We want to use the default choice if the user presses enter
-			// without making a choice
-			m.choice = &m.defaultChoice
-			return m, tea.Quit
-		}
-	}
-	return m, nil
-}
-
-func (m *confirmModel) View() string {
-	yesText, noText := m.yesText, m.noText
-	if m.defaultChoice {
-		yesText = strings.ToUpper(m.yesText)
-		noText = strings.ToLower(m.noText)
-	} else {
-		yesText = strings.ToLower(m.yesText)
-		noText = strings.ToUpper(m.noText)
-	}
-	return fmt.Sprintf("%s (%s/%s): ", m.prompt, yesText, noText)
-}
-
-// ConfirmAction prompts the user to confirm an action with a customizable
-// Yes/No prompt. To define the default choice, set defaultChoice accordingly,
-// if true, the default choice will be the string in yesText, otherwise the
-// one in noText.
+// ConfirmAction prompts the user to confirm an action, it supports customizing
+// the prompt and the text for the "yes" and "no" options. If the user does not
+// provide an answer, the default choice is used.
 //
 // Example:
 //
-//	confirmed, err := cli.ConfirmAction(
-//		"Do you want to continue?",
-//		"Yes, continue",
-//		"No, cancel",
+//	confirm, err := myApp.CLI.ConfirmAction(
+//		"Do you like Batman?",
+//		"Yes", "No",
 //		true,
 //	)
 //	if err != nil {
 //		fmt.Println(err)
-//		return
+//		return err
 //	}
-//	if confirmed {
-//		fmt.Println("Continuing...")
+//	if confirm {
+//		fmt.Println("Everybody likes Batman!")
 //	} else {
-//		fmt.Println("Cancelled")
+//		fmt.Println("You don't like Batman...")
 //	}
 func (c *Command) ConfirmAction(prompt, yesText, noText string, defaultChoice bool) (bool, error) {
-	model := confirmModel{
-		prompt:        prompt,
-		yesText:       yesText,
-		noText:        noText,
-		defaultChoice: defaultChoice,
+	var confirm bool
+	confirmationPrompt := &survey.Confirm{
+		Message: prompt,
+		Default: defaultChoice,
+		Help:    fmt.Sprintf("Yes: %s, No: %s", yesText, noText),
 	}
-
-	p := tea.NewProgram(&model)
-	if _, err := p.Run(); err != nil {
-		return false, fmt.Errorf("failed to run confirmation program: %v", err)
+	err := survey.AskOne(confirmationPrompt, &confirm)
+	if err != nil {
+		return false, fmt.Errorf("confirmation failed: %v", err)
 	}
-
-	if model.choice == nil {
-		return false, fmt.Errorf("no choice made")
-	}
-	return *model.choice, nil
+	return confirm, nil
 }

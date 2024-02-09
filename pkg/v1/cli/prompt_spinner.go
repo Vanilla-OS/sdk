@@ -1,71 +1,50 @@
 package cli
 
 import (
-	"fmt"
-
-	"github.com/charmbracelet/bubbles/spinner"
-	tea "github.com/charmbracelet/bubbletea"
+	"github.com/pterm/pterm"
 )
 
 type SpinnerModel struct {
-	spinner  spinner.Model
+	spinner  *pterm.SpinnerPrinter
 	message  string
-	quitting bool
+	finished bool
 }
 
-func NewSpinnerModel(message string) SpinnerModel {
-	s := spinner.New()
-	s.Spinner = spinner.Dot
-	return SpinnerModel{
-		spinner: s,
+func newSpinnerModel(message string) *SpinnerModel {
+	spinner, _ := pterm.DefaultSpinner.Start(message)
+	return &SpinnerModel{
+		spinner: spinner,
 		message: message,
 	}
 }
 
-func (m SpinnerModel) Init() tea.Cmd {
-	return m.spinner.Tick
+func (m *SpinnerModel) UpdateMessage(message string) {
+	m.spinner.UpdateText(message)
 }
 
-func (m SpinnerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if m.quitting {
-		return m, tea.Quit
-	}
-
-	var cmd tea.Cmd
-	m.spinner, cmd = m.spinner.Update(msg)
-	return m, cmd
-}
-
-func (m SpinnerModel) View() string {
-	str := fmt.Sprintf("%s %s\n", m.message, m.spinner.View())
-	if m.quitting {
-		return str + "\n"
-	}
-	return str
-}
-
-func (m *SpinnerModel) Start() {
-	p := tea.NewProgram(m)
-	go func() {
-		_, err := p.Run()
-		if err != nil {
-			fmt.Printf("Error running spinner program: %v\n", err)
-		}
-	}()
-}
-
-func (c *Command) StartSpinner(message string) *SpinnerModel {
-	model := NewSpinnerModel(message)
-	p := tea.NewProgram(model)
-	go func() {
-		_, err := p.Run()
-		if err != nil {
-			fmt.Printf("Error running spinner program: %v\n", err)
-		}
-	}()
-	return &model
-}
-
+// Stop stops the spinner and marks it as finished.
+//
+// Example:
+//
+//	spinner := myApp.CLI.StartSpinner("Loading the batmobile...")
+//	time.Sleep(3 * time.Second)
+//	spinner.Stop()
 func (m *SpinnerModel) Stop() {
-	m.quitting = true
+	if !m.finished {
+		m.spinner.Success()
+		m.finished = true
+	}
+}
+
+// StartSpinner starts a spinner with a message.
+// The spinner can be stopped by calling the Stop method on the returned model.
+//
+// Example:
+//
+//	spinner := myApp.CLI.StartSpinner("Loading the batmobile...")
+//	time.Sleep(3 * time.Second)
+//	spinner.Stop()
+func (c Command) StartSpinner(message string) *SpinnerModel {
+	model := newSpinnerModel(message)
+	return model
 }
