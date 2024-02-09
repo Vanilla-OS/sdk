@@ -12,6 +12,7 @@ type SpinnerModel struct {
 
 func newSpinnerModel(message string) *SpinnerModel {
 	spinner, _ := pterm.DefaultSpinner.Start(message)
+	spinner.Sequence = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
 	return &SpinnerModel{
 		spinner: spinner,
 		message: message,
