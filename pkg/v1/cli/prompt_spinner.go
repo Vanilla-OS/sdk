@@ -31,7 +31,7 @@ func (m *SpinnerModel) UpdateMessage(message string) {
 //	spinner.Stop()
 func (m *SpinnerModel) Stop() {
 	if !m.finished {
-		m.spinner.Success()
+		m.spinner.Stop()
 		m.finished = true
 	}
 }
