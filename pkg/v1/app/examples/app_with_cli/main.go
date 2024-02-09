@@ -95,6 +95,15 @@ func startPoll(cmd *cobra.Command, args []string) error {
 			time.Sleep(3 * time.Second)
 			spinner.Stop()
 			myApp.Log.Term.Info().Msgf("You picked %s", hero)
+
+			// Showing a progressbar now
+			bar := myApp.CLI.StartProgressBar("Preparing your hero...", 100)
+			for i := 0; i <= 100; i++ {
+				bar.Increment(1)
+				time.Sleep(50 * time.Millisecond)
+			}
+
+			myApp.Log.Term.Info().Msgf("Here is %s!", hero)
 		}
 	}
 
