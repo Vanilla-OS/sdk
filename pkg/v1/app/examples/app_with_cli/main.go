@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/vanilla-os/sdk/pkg/v1/app"
@@ -88,6 +89,11 @@ func startPoll(cmd *cobra.Command, args []string) error {
 				fmt.Println(err)
 				return err
 			}
+
+			// Let's simulate a spinner while we process the input
+			spinner := myApp.CLI.StartSpinner("Looking for your hero...")
+			time.Sleep(3 * time.Second)
+			spinner.Stop()
 			myApp.Log.Term.Info().Msgf("You picked %s", hero)
 		}
 	}
