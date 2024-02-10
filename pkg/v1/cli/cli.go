@@ -7,7 +7,7 @@ import (
 )
 
 // TODO:
-// This is a porting of the Cobra implemention fro the orchid library
+// This is a porting of the Cobra implemention from the orchid library
 // the roff implementation is not yet implemented, we still use the old
 // implementation from the orchid library
 
