@@ -176,7 +176,53 @@ func GetPartitionInfo(partitionPath string) (types.PartitionInfo, error) {
 	partition.Size = int64(sectorSize) * int64(parseUint64(strings.TrimSpace(string(size))))
 	partition.HumanSize = GetHumanSize(partition.Size)
 
+	info := GetFilesystemInfo(partitionPath)
+	partition.Filesystem = info["TYPE"]
+	partition.Label = info["LABEL"]
+	partition.UUID = info["UUID"]
+
 	return partition, nil
+}
+
+// GetFilesystemInfo returns information about the filesystem of a file or
+// partition.
+func GetFilesystemInfo(path string) map[string]string {
+	info := make(map[string]string)
+
+	// UUID
+	files, err := os.ReadDir("/dev/disk/by-uuid")
+	if err == nil {
+		for _, file := range files {
+			link, err := os.Readlink(filepath.Join("/dev/disk/by-uuid", file.Name()))
+			if err != nil {
+				continue
+			}
+			if strings.HasSuffix(link, filepath.Base(path)) {
+				info["UUID"] = file.Name()
+				break
+			}
+		}
+	}
+
+	// LABEL
+	files, err = os.ReadDir("/dev/disk/by-label")
+	if err == nil {
+		for _, file := range files {
+			link, err := os.Readlink(filepath.Join("/dev/disk/by-label", file.Name()))
+			if err != nil {
+				continue
+			}
+			if strings.HasSuffix(link, filepath.Base(path)) {
+				info["LABEL"] = file.Name()
+				break
+			}
+		}
+	}
+
+	// TYPE
+	// TODO: Implement this
+
+	return info
 }
 
 // parseUint64 parses a string into a uint64 or returns 0 if parsing fails

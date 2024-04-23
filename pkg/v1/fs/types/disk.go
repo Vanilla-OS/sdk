@@ -25,4 +25,19 @@ type PartitionInfo struct {
 
 	// HumanSize is the size of the partition in human-readable format
 	HumanSize string
+
+	// Filesystem type of the partition
+	Filesystem string
+
+	// Mountpoint of the partition
+	Mountpoint string
+
+	// Label of the partition
+	Label string
+
+	// UUID of the partition
+	UUID string
+
+	// Flags of the partition
+	Flags []string
 }
