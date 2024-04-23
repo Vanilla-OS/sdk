@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
-	_ "syscall"
 )
 
 // IsMounted checks if the given source path is mounted in the given
