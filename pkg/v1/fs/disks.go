@@ -56,8 +56,7 @@ func GetDiskList() ([]types.DiskInfo, error) {
 		// Skip non-disk entries
 		if strings.HasPrefix(name, "loop") ||
 			strings.HasPrefix(name, "ram") ||
-			strings.HasPrefix(name, "zram") ||
-			strings.HasPrefix(name, "dm") {
+			strings.HasPrefix(name, "zram") {
 			continue
 		}
 
