@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jochenvg/go-udev"
 	"github.com/vanilla-os/sdk/pkg/v1/fs/types"
 )
 
@@ -27,6 +28,12 @@ import (
 //			fmt.Printf("Partition: %s\n", partition.Path)
 //			fmt.Printf("Size: %d\n", partition.Size)
 //			fmt.Printf("HumanSize: %s\n", partition.HumanSize)
+//			fmt.Printf("Filesystem: %s\n", partition.Filesystem)
+//			fmt.Printf("Mountpoint: %s\n", partition.Mountpoint)
+//			fmt.Printf("Label: %s\n", partition.Label)
+//			fmt.Printf("UUID: %s\n", partition.UUID)
+//			fmt.Printf("PARTUUID: %s\n", partition.PARTUUID)
+//			fmt.Printf("Flags: %v\n", partition.Flags)
 //		}
 //	}
 func GetDiskList() ([]types.DiskInfo, error) {
@@ -42,6 +49,10 @@ func GetDiskList() ([]types.DiskInfo, error) {
 	for _, file := range files {
 		name := file.Name()
 
+		if isPartition(name) {
+			continue
+		}
+
 		// Skip non-disk entries
 		if strings.HasPrefix(name, "loop") ||
 			strings.HasPrefix(name, "ram") ||
@@ -51,7 +62,7 @@ func GetDiskList() ([]types.DiskInfo, error) {
 		}
 
 		diskPath := filepath.Join("/dev", name)
-		diskInfo, err := GetDiskInfo(diskPath)
+		info, err := GetDiskInfo(diskPath)
 		if err != nil {
 			return nil, err
 		}
@@ -60,7 +71,11 @@ func GetDiskList() ([]types.DiskInfo, error) {
 		if err != nil {
 			return nil, err
 		}
-		diskInfo.Partitions = partitions
+
+		diskInfo := types.DiskInfo{
+			BaseInfo:   info,
+			Partitions: partitions,
+		}
 
 		diskMap[diskPath] = diskInfo
 	}
@@ -103,125 +118,68 @@ func GetPartitionList(diskPath string) ([]types.PartitionInfo, error) {
 		}
 
 		partitionPath := filepath.Join("/dev", name)
-		partitionInfo, err := GetPartitionInfo(partitionPath)
+		info, err := GetDiskInfo(partitionPath)
 		if err != nil {
 			return nil, err
 		}
 
+		partitionInfo := types.PartitionInfo{
+			BaseInfo: info,
+		}
 		partitions = append(partitions, partitionInfo)
 	}
 
 	return partitions, nil
 }
 
-// GetDiskInfo returns information about a specific disk
+// GetDiskInfo returns information about a specific disk partition
 //
 // Example:
 //
-//	diskInfo, err := fs.GetDiskInfo("/dev/sda")
-//	if err != nil {
-//		fmt.Printf("Error getting disk info: %v", err)
-//		return
-//	}
-//	fmt.Printf("Path: %s\n", diskInfo.Path)
-//	fmt.Printf("Size: %d\n", diskInfo.Size)
-//	fmt.Printf("HumanSize: %s\n", diskInfo.HumanSize)
-//	for _, partition := range diskInfo.Partitions {
-//		fmt.Printf("Partition: %s\n", partition.Path)
-//		fmt.Printf("Size: %d\n", partition.Size)
-//		fmt.Printf("HumanSize: %s\n", partition.HumanSize)
-//	}
-func GetDiskInfo(diskPath string) (types.DiskInfo, error) {
-	disk := types.DiskInfo{
-		Path: diskPath,
-	}
-
-	sizePath := filepath.Join("/sys/class/block", filepath.Base(diskPath), "size")
-	size, err := os.ReadFile(sizePath)
-	if err != nil {
-		return types.DiskInfo{}, err
-	}
-
-	sectorSize := 512
-	disk.Size = int64(sectorSize) * int64(parseUint64(strings.TrimSpace(string(size))))
-	disk.HumanSize = GetHumanSize(disk.Size)
-
-	return disk, nil
-}
-
-// GetPartitionInfo returns information about a specific disk partition
-//
-// Example:
-//
-//	partitionInfo, err := fs.GetPartitionInfo("/dev/sda1")
+//	info, err := fs.GetDiskInfo("/dev/sda1")
 //	if err != nil {
 //		fmt.Printf("Error getting partition info: %v", err)
 //		return
 //	}
-//	fmt.Printf("Path: %s\n", partitionInfo.Path)
-//	fmt.Printf("Size: %d\n", partitionInfo.Size)
-//	fmt.Printf("HumanSize: %s\n", partitionInfo.HumanSize)
-func GetPartitionInfo(partitionPath string) (types.PartitionInfo, error) {
-	partition := types.PartitionInfo{
+//	fmt.Printf("Path: %s\n", info.Path)
+//	fmt.Printf("Size: %d\n", info.Size)
+//	fmt.Printf("HumanSize: %s\n", info.HumanSize)
+func GetDiskInfo(partitionPath string) (types.BaseInfo, error) {
+	info := types.BaseInfo{
 		Path: partitionPath,
 	}
 
 	sizePath := filepath.Join("/sys/class/block", filepath.Base(partitionPath), "size")
 	size, err := os.ReadFile(sizePath)
 	if err != nil {
-		return types.PartitionInfo{}, err
+		return info, err
 	}
 
 	sectorSize := 512
-	partition.Size = int64(sectorSize) * int64(parseUint64(strings.TrimSpace(string(size))))
-	partition.HumanSize = GetHumanSize(partition.Size)
+	info.Size = int64(sectorSize) * int64(parseUint64(strings.TrimSpace(string(size))))
+	info.HumanSize = GetHumanSize(info.Size)
 
-	info := GetFilesystemInfo(partitionPath)
-	partition.Filesystem = info["TYPE"]
-	partition.Label = info["LABEL"]
-	partition.UUID = info["UUID"]
+	fsInfo := GetFilesystemInfo(partitionPath)
+	info.Filesystem = fsInfo["TYPE"]
+	info.Label = fsInfo["LABEL"]
+	info.UUID = fsInfo["UUID"]
+	info.PARTUUID = fsInfo["PARTUUID"]
 
-	return partition, nil
+	return info, nil
 }
 
 // GetFilesystemInfo returns information about the filesystem of a file or
-// partition.
+// partition by reading from /etc/mtab.
 func GetFilesystemInfo(path string) map[string]string {
 	info := make(map[string]string)
 
-	// UUID
-	files, err := os.ReadDir("/dev/disk/by-uuid")
-	if err == nil {
-		for _, file := range files {
-			link, err := os.Readlink(filepath.Join("/dev/disk/by-uuid", file.Name()))
-			if err != nil {
-				continue
-			}
-			if strings.HasSuffix(link, filepath.Base(path)) {
-				info["UUID"] = file.Name()
-				break
-			}
-		}
-	}
-
-	// LABEL
-	files, err = os.ReadDir("/dev/disk/by-label")
-	if err == nil {
-		for _, file := range files {
-			link, err := os.Readlink(filepath.Join("/dev/disk/by-label", file.Name()))
-			if err != nil {
-				continue
-			}
-			if strings.HasSuffix(link, filepath.Base(path)) {
-				info["LABEL"] = file.Name()
-				break
-			}
-		}
-	}
-
-	// TYPE
-	// TODO: Implement this
-
+	// FS information
+	u := udev.Udev{}
+	d := u.NewDeviceFromSyspath(filepath.Join("/sys/class/block", filepath.Base(path)))
+	info["LABEL"] = d.PropertyValue("ID_FS_LABEL")
+	info["TYPE"] = d.PropertyValue("ID_FS_TYPE")
+	info["UUID"] = d.PropertyValue("ID_FS_UUID")
+	info["PARTUUID"] = d.PropertyValue("ID_PART_ENTRY_UUID")
 	return info
 }
 
@@ -262,4 +220,14 @@ func GetHumanSize(size int64) string {
 	default:
 		return fmt.Sprintf("%.2f TB", sizeFloat/tB)
 	}
+}
+
+// isPartition returns true if the specified block device is a partition
+func isPartition(deviceName string) bool {
+	path := filepath.Join("/sys/class/block", deviceName, "partition")
+	info, err := os.Stat(path)
+	if err == nil && !info.IsDir() {
+		return true
+	}
+	return false
 }

@@ -5,6 +5,7 @@ go 1.21.1
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/godbus/dbus v4.1.0+incompatible
+	github.com/jochenvg/go-udev v0.0.0-20171110120927-d6b62d56d37b
 	github.com/phuslu/log v1.0.88
 	github.com/pterm/pterm v0.12.51
 	github.com/robfig/cron/v3 v3.0.1
@@ -29,6 +30,7 @@ require (
 	github.com/gookit/color v1.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jkeiser/iter v0.0.0-20200628201005-c8aa0ae784d1 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/lithammer/fuzzysearch v1.1.5 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
