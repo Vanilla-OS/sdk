@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/vanilla-os/sdk/pkg/v1/hardware"
@@ -22,4 +23,14 @@ func TestGetBatteryStats(t *testing.T) {
 	t.Logf("Percentage: %d", batteryStats.Percentage)
 	t.Logf("Status: %s", batteryStats.Status)
 	t.Logf("Voltage: %d", batteryStats.Voltage)
+}
+
+func TestGetBatteryHealth(t *testing.T) {
+	batteryHealth, err := hardware.GetBatteryHealth()
+	if err != nil {
+		t.Errorf("Error: %v", err)
+		return
+	}
+
+	t.Logf("Health: %s", fmt.Sprintf("%f", batteryHealth))
 }

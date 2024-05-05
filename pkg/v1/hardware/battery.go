@@ -43,6 +43,16 @@ func GetBatteryStats() (*types.BatteryStats, error) {
 		return nil, fmt.Errorf("failed to parse battery capacity: %v", err)
 	}
 
+	capacityDesignContent, err := readSysFile(sysfsBatteryPath, "charge_full_design")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read battery design capacity: %v", err)
+	}
+
+	capacityDesign, err := strconv.Atoi(strings.TrimSpace(capacityDesignContent))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse battery design capacity: %v", err)
+	}
+
 	percentageContent, err := readSysFile(sysfsBatteryPath, "capacity")
 	if err != nil {
 		// If battery capacity information is not available, assume it's not
@@ -85,13 +95,28 @@ func GetBatteryStats() (*types.BatteryStats, error) {
 	}
 
 	batteryStats := &types.BatteryStats{
-		Capacity:   capacity,
-		Percentage: percentage,
-		Status:     status,
-		Voltage:    voltage,
+		Capacity:       capacity,
+		CapacityDesign: capacityDesign,
+		Percentage:     percentage,
+		Status:         status,
+		Voltage:        voltage,
 	}
 
 	return batteryStats, nil
+}
+
+func GetBatteryHealth() (float64, error) {
+	battery, err := GetBatteryStats()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get battery stats: %v", err)
+	}
+
+	health := (float64(battery.Capacity) / float64(battery.CapacityDesign)) * 100
+	if health > 100 {
+		health = 100
+	}
+
+	return health, nil
 }
 
 // getBatterySlot returns the available battery slot.

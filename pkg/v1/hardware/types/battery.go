@@ -2,10 +2,11 @@ package types
 
 // BatteryStats represents battery statistics
 type BatteryStats struct {
-	Capacity   int           `json:"capacity"`
-	Percentage int           `json:"percentage"`
-	Status     BatteryStatus `json:"status"`
-	Voltage    int           `json:"voltage"`
+	Capacity       int           `json:"capacity"`
+	CapacityDesign int           `json:"capacityDesign"`
+	Percentage     int           `json:"percentage"`
+	Status         BatteryStatus `json:"status"`
+	Voltage        int           `json:"voltage"`
 }
 
 // BatteryStatus represents the status of a battery
