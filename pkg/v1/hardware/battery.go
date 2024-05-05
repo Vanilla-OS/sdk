@@ -105,13 +105,26 @@ func GetBatteryStats() (*types.BatteryStats, error) {
 	return batteryStats, nil
 }
 
-func GetBatteryHealth() (float64, error) {
-	battery, err := GetBatteryStats()
-	if err != nil {
-		return 0, fmt.Errorf("failed to get battery stats: %v", err)
-	}
-
-	health := (float64(battery.Capacity) / float64(battery.CapacityDesign)) * 100
+// GetBatteryHealth calculates the battery health based on the battery
+// statistics. It returns the battery health percentage.
+//
+// Example:
+//
+//	batteryStats, err := hardware.GetBatteryStats()
+//	if err != nil {
+//	  fmt.Printf("Error: %v\n", err)
+//	  return
+//	}
+//
+//	batteryHealth, err := hardware.GetBatteryHealth(batteryStats)
+//	if err != nil {
+//	  fmt.Printf("Error: %v\n", err)
+//	  return
+//	}
+//
+//	fmt.Printf("Health: %f\n", batteryHealth)
+func GetBatteryHealth(batteryStats *types.BatteryStats) (float64, error) {
+	health := (float64(batteryStats.Capacity) / float64(batteryStats.CapacityDesign)) * 100
 	if health > 100 {
 		health = 100
 	}

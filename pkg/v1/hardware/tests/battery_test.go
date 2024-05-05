@@ -26,7 +26,18 @@ func TestGetBatteryStats(t *testing.T) {
 }
 
 func TestGetBatteryHealth(t *testing.T) {
-	batteryHealth, err := hardware.GetBatteryHealth()
+	batteryStats, err := hardware.GetBatteryStats()
+	if err != nil {
+		t.Errorf("Error: %v", err)
+		return
+	}
+
+	if batteryStats == nil {
+		t.Skip("No battery included")
+		return
+	}
+
+	batteryHealth, err := hardware.GetBatteryHealth(batteryStats)
 	if err != nil {
 		t.Errorf("Error: %v", err)
 		return
