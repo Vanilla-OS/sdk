@@ -27,7 +27,8 @@ import (
 func GetBatteryStats() (*types.BatteryStats, error) {
 	slot, err := getBatterySlot()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get battery slot: %v", err)
+		// If battery slot is not found, assume it's not a portable device
+		return nil, nil
 	}
 
 	sysfsBatteryPath := "/sys/class/power_supply/" + slot
