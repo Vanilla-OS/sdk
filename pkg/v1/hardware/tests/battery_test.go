@@ -18,6 +18,7 @@ func TestGetBatteryStats(t *testing.T) {
 		return
 	}
 
+	t.Logf("Capacity: %d", batteryStats.Capacity)
 	t.Logf("Percentage: %d", batteryStats.Percentage)
 	t.Logf("Status: %s", batteryStats.Status)
 	t.Logf("Voltage: %d", batteryStats.Voltage)
