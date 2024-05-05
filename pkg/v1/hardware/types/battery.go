@@ -17,6 +17,9 @@ const (
 	// BatteryStatusCharging indicates the battery is currently charging
 	BatteryStatusCharging BatteryStatus = "charging"
 
+	// BatteryStatusNotCharging indicates the battery is not charging
+	BatteryStatusNotCharging BatteryStatus = "not charging"
+
 	// BatteryStatusDischarging indicates the battery is currently discharging
 	BatteryStatusDischarging BatteryStatus = "discharging"
 

@@ -2,6 +2,7 @@ package hardware
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -24,7 +25,12 @@ import (
 //	fmt.Printf("Status: %s\n", batteryStats.Status)
 //	fmt.Printf("Voltage: %d\n", batteryStats.Voltage)
 func GetBatteryStats() (*types.BatteryStats, error) {
-	const sysfsBatteryPath = "/sys/class/power_supply/BAT0"
+	slot, err := getBatterySlot()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get battery slot: %v", err)
+	}
+
+	sysfsBatteryPath := "/sys/class/power_supply/" + slot
 
 	percentageContent, err := readSysFile(sysfsBatteryPath, "capacity")
 	if err != nil {
@@ -45,6 +51,8 @@ func GetBatteryStats() (*types.BatteryStats, error) {
 
 	var status types.BatteryStatus
 	switch strings.ToLower(strings.TrimSpace(statusContent)) {
+	case "not charging":
+		status = types.BatteryStatusNotCharging
 	case "charging":
 		status = types.BatteryStatusCharging
 	case "discharging":
@@ -72,4 +80,22 @@ func GetBatteryStats() (*types.BatteryStats, error) {
 	}
 
 	return batteryStats, nil
+}
+
+// getBatterySlot returns the available battery slot.
+func getBatterySlot() (string, error) {
+	const sysfsPowerSupplyPath = "/sys/class/power_supply"
+
+	files, err := os.ReadDir(sysfsPowerSupplyPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read power supply directory: %v", err)
+	}
+
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), "BAT") {
+			return file.Name(), nil
+		}
+	}
+
+	return "", fmt.Errorf("no battery slot found")
 }
