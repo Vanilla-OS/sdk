@@ -17,6 +17,11 @@ criteria:
   adds extra depedencies, please open an issue with your suggestion so the
   maintainers can decide whether it should be implemented. This will avoid
   unnecessary work that may not be merged.
+- **Command-Line Tools**:
+   Use of command-line tools under the hood should always be considered a
+  last resort. Whenever command-line tools are used, it is useful to map a
+  wrapper to allow more practical usage. In such cases, the wrapper should be
+  placed in the `pkg/v1/legacy` package.
 
 ## Package Structure
 
