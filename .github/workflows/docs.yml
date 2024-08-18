@@ -16,13 +16,13 @@ jobs:
         with:
           go-version: 1.21
 
-      - name: Install godoc2md
+      - name: Install pallas
         run: |
-          go get github.com/gideaworx/godoc2md
-          go install github.com/gideaworx/godoc2md
+            curl -L -o pallas https://github.com/Vanilla-OS/Pallas/releases/download/continuous/pallas
+            chmod +x pallas
 
       - name: Generate Docs
-        run: sh scripts/gen-docs.sh
+        run: ./pallas
 
       - name: Setup Pages
         id: pages
@@ -31,7 +31,7 @@ jobs:
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./docs
+          source: ./dist
           destination: ./_site
 
       - name: Upload artifact
