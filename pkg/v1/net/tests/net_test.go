@@ -23,6 +23,13 @@ func TestGetNetworkInterfaces(t *testing.T) {
 		t.Logf("Name: %s", iface.Name)
 		t.Logf("Hardware address: %s", iface.HardwareAddr)
 		t.Logf("IP addresses: %v", iface.IPAddresses)
+		t.Logf("Status: %s", iface.Status)
+		t.Logf("Running: %t", iface.Running)
+		t.Logf("Supports broadcast: %t", iface.SupportsBroadcast)
+		t.Logf("Supports multicast: %t", iface.SupportsMulticast)
+		t.Logf("Is loopback: %t", iface.IsLoopback)
+		t.Logf("Is point-to-point: %t", iface.IsP2P)
+		t.Log("--------------------------------------------------")
 	}
 }
 

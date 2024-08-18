@@ -11,4 +11,41 @@ type NetworkInterfaceInfo struct {
 	// IPAddresses is a list of IP addresses associated with the
 	// network interface
 	IPAddresses []string `json:"ip_addresses"`
+
+	// Status is the status of the network interface
+	Status NetworkInterfaceStatus `json:"status"`
+
+	// Running indicates whether the network interface is running
+	Running bool `json:"running"`
+
+	// SupportsBroadcast indicates whether the network interface supports
+	// broadcast
+	SupportsBroadcast bool `json:"supports_broadcast"`
+
+	// SupportsMulticast indicates whether the network interface supports
+	// multicast
+	SupportsMulticast bool `json:"supports_multicast"`
+
+	// IsLoopback indicates whether the network interface is a loopback
+	// interface
+	IsLoopback bool `json:"is_loopback"`
+
+	// IsP2P indicates whether the network interface is a point-to-point
+	// interface
+	IsP2P bool `json:"is_point_to_point"`
 }
+
+// NetworkInterfaceStatus represents the status of a network interface
+type NetworkInterfaceStatus string
+
+const (
+	// NetworkInterfaceStatusUp indicates that the network interface is up
+	NetworkInterfaceStatusUp NetworkInterfaceStatus = "up"
+
+	// NetworkInterfaceStatusDown indicates that the network interface is down
+	NetworkInterfaceStatusDown NetworkInterfaceStatus = "down"
+
+	// NetworkInterfaceStatusUnknown indicates that the status of the network
+	// interface is unknown
+	NetworkInterfaceStatusUnknown NetworkInterfaceStatus = "unknown"
+)

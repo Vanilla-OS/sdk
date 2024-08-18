@@ -52,10 +52,31 @@ func GetNetworkInterfaces() ([]types.NetworkInterfaceInfo, error) {
 			}
 		}
 
+		// Determine the status of the network interface by unpacking the
+		// flags, looking for the 'up' flag. Default is unknown, if not up
+		// then it's down (as per the net package)
+		var _status types.NetworkInterfaceStatus
+		_status = types.NetworkInterfaceStatusUnknown
+		if iface.Flags&net.FlagUp != 0 {
+			_status = types.NetworkInterfaceStatusUp
+		} else {
+			_status = types.NetworkInterfaceStatusDown
+		}
+
 		interfaceInfo := types.NetworkInterfaceInfo{
 			Name:         iface.Name,
 			HardwareAddr: iface.HardwareAddr.String(),
 			IPAddresses:  ipAddresses,
+
+			// Following fields are determined by the flags which are
+			// unpacked from the net.Interface type for better readability
+			// and simplicity in condition checking
+			Status:            _status,
+			Running:           iface.Flags&net.FlagRunning != 0,
+			SupportsBroadcast: iface.Flags&net.FlagBroadcast != 0,
+			SupportsMulticast: iface.Flags&net.FlagMulticast != 0,
+			IsLoopback:        iface.Flags&net.FlagLoopback != 0,
+			IsP2P:             iface.Flags&net.FlagPointToPoint != 0,
 		}
 
 		interfaceInfoList = append(interfaceInfoList, interfaceInfo)
