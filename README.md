@@ -13,10 +13,10 @@ operating system.
 
 ## Contributing
 
-If you want to contribute to the SDK, check out the [Contributing](docs/contributing.md)
+If you want to contribute to the SDK, check out the [Contributing](https://github.com/Vanilla-OS/sdk/blob/main/docs/contributing.md)
 document.
 
 ## Getting Started
 
-To get started with the SDK, check out the [Getting Started](docs/getting-started.md)
+To get started with the SDK, check out the [Getting Started](https://github.com/Vanilla-OS/sdk/blob/main/docs/getting-started.md)
 document.
