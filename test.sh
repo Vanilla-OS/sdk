@@ -2,13 +2,24 @@
 
 IMAGE_NAME="vanilla-sdk-test"
 
-if command -v docker &> /dev/null; then
-    CMD=docker
-elif command -v podman &> /dev/null; then
-    CMD=podman
+if [ -n "$CONTAINER_ID" ]; then
+    if [ -n "$(host-spawn which docker)" ]; then
+        CMD="host-spawn docker"
+    elif [ -n "$(host-spawn which podman)" ]; then
+        CMD="host-spawn podman"
+    else
+        echo "Neither Docker nor Podman is installed on the host. Install one and try again."
+        exit 1
+    fi
 else
-    echo "Neither Docker nor Podman is installed. Install one and try again."
-    exit 1
+    if [ -n "$(which docker)" ]; then
+        CMD=docker
+    elif [ -n "$(which podman)" ]; then
+        CMD=podman
+    else
+        echo "Neither Docker nor Podman is installed. Install one and try again."
+        exit 1
+    fi
 fi
 
 echo "Building image with $CMD..."
