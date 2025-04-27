@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/vanilla-os/sdk/pkg/v1/net"
+	net_types "github.com/vanilla-os/sdk/pkg/v1/net/types"
 )
 
 const testHostname = "vanillaos.org"
@@ -139,5 +140,20 @@ func TestGetActiveConnections(t *testing.T) {
 		if i == 5 {
 			break
 		}
+	}
+}
+
+func TestCheckPortStatus(t *testing.T) {
+	port := 80
+	status := net.CheckPortStatus(testHostname, port)
+	if status != net_types.PortOpen {
+		t.Logf("Warning: Expected port %d to be open, but got %s. Maybe it's closed for real? Skipping test.", port, status)
+		t.Skip()
+	}
+
+	port = 12345
+	status = net.CheckPortStatus(testHostname, port)
+	if status != net_types.PortClosed {
+		t.Errorf("Expected port %d to be closed, got %s", port, status)
 	}
 }

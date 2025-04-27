@@ -2,6 +2,7 @@ package net
 
 import (
 	"bufio"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -216,10 +217,14 @@ func readARPTable() (map[string]string, error) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		fields := strings.Fields(scanner.Text())
-		if len(fields) >= 4 && fields[2] != "00:00:00:00:00:00" {
-			arpTable[fields[0]] = fields[2]
+	// Skip header line
+	if scanner.Scan() {
+		for scanner.Scan() {
+			fields := strings.Fields(scanner.Text())
+			// Ensure the line has enough fields and the MAC address is valid
+			if len(fields) >= 4 && fields[2] != "00:00:00:00:00:00" {
+				arpTable[fields[0]] = fields[2]
+			}
 		}
 	}
 
@@ -292,8 +297,8 @@ func IsLocalNetworkIP(ipAddress string) bool {
 //		fmt.Println("Port is closed")
 //	}
 func CheckPortStatus(host string, port int) types.PortStatus {
-	address := fmt.Sprintf("%s:%d", host, port)
-	conn, err := net.Dial("tcp", address)
+	address := net.JoinHostPort(host, fmt.Sprintf("%d", port))
+	conn, err := net.DialTimeout("tcp", address, 2*1000*1000*1000)
 	if err != nil {
 		return types.PortClosed
 	}
@@ -313,26 +318,56 @@ func CheckPortStatus(host string, port int) types.PortStatus {
 //	}
 //
 //	fmt.Printf("Default gateway: %s\n", gateway)
-//
-// Notes:
-//
-// this function relies on the 'ip' command
 func GetDefaultGateway() (string, error) {
-	routes, err := net.InterfaceAddrs()
+	file, err := os.Open("/proc/net/route")
 	if err != nil {
-		return "", fmt.Errorf("error retrieving interface addresses: %v", err)
+		return "", fmt.Errorf("error opening /proc/net/route: %v", err)
 	}
+	defer file.Close()
 
-	for _, route := range routes {
-		ipNet, ok := route.(*net.IPNet)
-		if ok && !ipNet.IP.IsLoopback() {
-			if ipNet.IP.To4() != nil {
-				return ipNet.IP.String(), nil
+	scanner := bufio.NewScanner(file)
+	// Skip header line
+	if scanner.Scan() {
+		for scanner.Scan() {
+			fields := strings.Fields(scanner.Text())
+			// Check if the line has enough fields
+			// Destination (field 1) should be 00000000
+			// Flags (field 3) should include RTF_GATEWAY (0x2)
+			if len(fields) >= 4 && fields[1] == "00000000" && (parseHex(fields[3])&0x2) != 0 {
+				gatewayHex := fields[2] // Gateway is field 2
+				// The gateway address is in little-endian hexadecimal format
+				ipBytes, err := hex.DecodeString(gatewayHex)
+				if err != nil || len(ipBytes) != 4 {
+					fmt.Fprintf(os.Stderr, "Warning: skipping malformed gateway hex '%s' in /proc/net/route\n", gatewayHex)
+					continue
+				}
+				// Reverse bytes for standard big-endian representation
+				ip := net.IPv4(ipBytes[3], ipBytes[2], ipBytes[1], ipBytes[0])
+				// Ensure the parsed IP is not unspecified (0.0.0.0)
+				if !ip.IsUnspecified() {
+					return ip.String(), nil
+				}
 			}
 		}
 	}
 
-	return "", errors.New("default gateway not found")
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("error reading /proc/net/route: %v", err)
+	}
+
+	// It's also possible the container genuinely has no default route configured.
+	return "", errors.New("default gateway not found in /proc/net/route")
+}
+
+// parseHex parses a hex string and returns its integer value.
+// Returns 0 on error.
+func parseHex(s string) int {
+	// Use ParseUint as flags are unsigned. Base 16, 64-bit size.
+	val, err := strconv.ParseUint(s, 16, 64)
+	if err != nil {
+		return 0 // Return 0 if parsing fails
+	}
+	return int(val)
 }
 
 // GetActiveConnections returns information about active network connections.
@@ -356,13 +391,18 @@ func GetActiveConnections() ([]types.ConnectionInfo, error) {
 	files := []string{"/proc/net/tcp", "/proc/net/tcp6"}
 
 	for _, filePath := range files {
+		isIPv6 := strings.HasSuffix(filePath, "6")
 		file, err := os.Open(filePath)
 		if err != nil {
+			// Don't fail if one file is missing (e.g., IPv6 disabled)
+			if os.IsNotExist(err) {
+				continue
+			}
 			return nil, fmt.Errorf("error opening %s: %v", filePath, err)
 		}
-		defer file.Close()
+		defer file.Close() // Ensure closure in this scope
 
-		connInfosFromFile, err := parseConnections(file)
+		connInfosFromFile, err := parseConnections(file, isIPv6)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing %s: %v", filePath, err)
 		}
@@ -375,28 +415,31 @@ func GetActiveConnections() ([]types.ConnectionInfo, error) {
 
 // parseConnections parses the output of /proc/net/tcp and /proc/net/tcp6
 // to obtain information about active connections.
-func parseConnections(reader io.Reader) ([]types.ConnectionInfo, error) {
+func parseConnections(reader io.Reader, isIPv6 bool) ([]types.ConnectionInfo, error) {
 	connInfos := make([]types.ConnectionInfo, 0)
 
 	scanner := bufio.NewScanner(reader)
+	// Skip header line
+	if !scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return nil, fmt.Errorf("error reading header: %v", err)
+		}
+		return connInfos, nil // Empty file is valid
+	}
+
 	for scanner.Scan() {
 		line := scanner.Text()
-
-		// Skip header line
-		if strings.HasPrefix(line, "  sl") {
-			continue
-		}
-
 		fields := strings.Fields(line)
 
-		if len(fields) >= 4 {
-			localAddr, remoteAddr, state, err := parseConnectionFields(fields)
+		if len(fields) >= 4 { // Need at least sl, local_address, rem_address, st
+			localAddr, remoteAddr, state, err := parseConnectionFields(fields, isIPv6)
 			if err != nil {
-				return nil, err
+				// Log or handle parsing errors for individual lines?
+				// For now, continue to the next line.
+				continue
 			}
 
 			var connState types.ConnState
-
 			switch state {
 			case "01":
 				connState = types.ConnStateEnstablished
@@ -444,42 +487,67 @@ func parseConnections(reader io.Reader) ([]types.ConnectionInfo, error) {
 
 // parseConnectionFields parses the fields of a line in /proc/net/tcp or
 // /proc/net/tcp6.
-func parseConnectionFields(fields []string) (string, string, string, error) {
-	localAddr, remoteAddr, state := fields[1], fields[2], fields[3]
+func parseConnectionFields(fields []string, isIPv6 bool) (string, string, string, error) {
+	if len(fields) < 4 {
+		return "", "", "", fmt.Errorf("insufficient fields for parsing connection line")
+	}
+	localAddrField, remoteAddrField, state := fields[1], fields[2], fields[3]
 
-	localIP, localPort, err := parseAddress(localAddr)
+	localIP, localPort, err := parseAddress(localAddrField, isIPv6)
 	if err != nil {
-		return "", "", "", fmt.Errorf("error parsing local address: %v", err)
+		return "", "", "", fmt.Errorf("error parsing local address '%s': %v", localAddrField, err)
 	}
 
-	remoteIP, remotePort, err := parseAddress(remoteAddr)
+	remoteIP, remotePort, err := parseAddress(remoteAddrField, isIPv6)
 	if err != nil {
-		return "", "", "", fmt.Errorf("error parsing remote address: %v", err)
+		return "", "", "", fmt.Errorf("error parsing remote address '%s': %v", remoteAddrField, err)
 	}
 
-	return fmt.Sprintf("%s:%s", localIP, localPort), fmt.Sprintf("%s:%s", remoteIP, remotePort), state, nil
+	// Format address string based on IP version
+	localAddrStr := net.JoinHostPort(localIP, localPort)
+	remoteAddrStr := net.JoinHostPort(remoteIP, remotePort)
+
+	return localAddrStr, remoteAddrStr, state, nil
 }
 
-// parseAddress parses an address in hexadecimal format and returns the
-// corresponding IP address and port.
-func parseAddress(address string) (string, string, error) {
+// parseAddress parses an address in hexadecimal format from /proc/net/tcp*
+// and returns the corresponding IP address and port string.
+// Handles both IPv4 (8 hex chars) and IPv6 (32 hex chars).
+func parseAddress(address string, isIPv6 bool) (string, string, error) {
 	parts := strings.Split(address, ":")
 	if len(parts) != 2 {
 		return "", "", fmt.Errorf("invalid address format: %s", address)
 	}
+	hexIP, hexPort := parts[0], parts[1]
 
-	// We have to do some parsing here to get human-readable values
-	ipInt, err := strconv.ParseInt(parts[0], 16, 64)
+	// Parse Port (same for IPv4 and IPv6)
+	portInt, err := strconv.ParseUint(hexPort, 16, 16) // Port is 16 bits
 	if err != nil {
-		return "", "", fmt.Errorf("error parsing hexadecimal IP address: %v", err)
+		return "", "", fmt.Errorf("error parsing hexadecimal port '%s': %v", hexPort, err)
 	}
-	ip := fmt.Sprintf("%d.%d.%d.%d", byte(ipInt>>24), byte(ipInt>>16), byte(ipInt>>8), byte(ipInt))
+	portStr := strconv.FormatUint(portInt, 10)
 
-	portInt, err := strconv.ParseInt(parts[1], 16, 64)
+	// Parse IP
+	ipBytes, err := hex.DecodeString(hexIP)
 	if err != nil {
-		return "", "", fmt.Errorf("error parsing hexadecimal port: %v", err)
+		return "", "", fmt.Errorf("error decoding hexadecimal IP '%s': %v", hexIP, err)
 	}
-	port := fmt.Sprintf("%d", portInt)
 
-	return ip, port, nil
+	var ip net.IP
+	if isIPv6 {
+		if len(ipBytes) != net.IPv6len {
+			return "", "", fmt.Errorf("invalid IPv6 hex length for '%s'", hexIP)
+		}
+		// IPv6 is stored in network byte order (big-endian) in /proc/net/tcp6
+		ip = net.IP(ipBytes)
+	} else {
+		if len(ipBytes) != net.IPv4len {
+			return "", "", fmt.Errorf("invalid IPv4 hex length for '%s'", hexIP)
+		}
+		// IPv4 is stored in host byte order (little-endian) in /proc/net/tcp
+		// Reverse bytes for standard big-endian representation
+		ip = net.IPv4(ipBytes[3], ipBytes[2], ipBytes[1], ipBytes[0])
+	}
+
+	return ip.String(), portStr, nil
 }
