@@ -11,7 +11,6 @@ import (
 	cliTypes "github.com/vanilla-os/sdk/pkg/v1/cli/types"
 	"github.com/vanilla-os/sdk/pkg/v1/i18n"
 	"github.com/vanilla-os/sdk/pkg/v1/logs"
-	logsTypes "github.com/vanilla-os/sdk/pkg/v1/logs/types"
 	"github.com/vorlif/spreak"
 )
 
@@ -30,7 +29,7 @@ type App struct {
 	Version string
 
 	// Log is the logger for the application
-	Log logsTypes.Logger
+	Log logs.Logger
 
 	// LC (Localizer) is the localizer for the application
 	LC spreak.Localizer
