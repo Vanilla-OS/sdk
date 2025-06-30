@@ -4,8 +4,10 @@ go 1.21.1
 
 require (
 	fyne.io/fyne/v2 v2.4.3
-	github.com/vanilla-os/sdk v0.0.0-20240210103031-e14d94619689
+	github.com/vanilla-os/sdk v0.0.0
 )
+
+replace github.com/vanilla-os/sdk => ../../..
 
 require (
 	atomicgo.dev/cursor v0.1.1 // indirect
@@ -49,7 +51,6 @@ require (
 	github.com/tevino/abool v1.2.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
 	github.com/tklauser/numcpus v0.7.0 // indirect
-	github.com/vanilla-os/orchid v0.5.0 // indirect
 	github.com/vorlif/spreak v0.6.0 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	github.com/yuin/goldmark v1.5.5 // indirect

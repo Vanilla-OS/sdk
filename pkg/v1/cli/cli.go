@@ -1,15 +1,13 @@
 package cli
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/vanilla-os/orchid/roff"
-	"github.com/vanilla-os/sdk/pkg/v1/cli/types"
-)
+	"fmt"
+	"time"
 
-// TODO:
-// This is a porting of the Cobra implemention from the orchid library
-// the roff implementation is not yet implemented, we still use the old
-// implementation from the orchid library
+	"github.com/spf13/cobra"
+	"github.com/vanilla-os/sdk/pkg/v1/cli/types"
+	"github.com/vanilla-os/sdk/pkg/v1/roff"
+)
 
 // NewCLI sets up the CLI for the application using CLIOptions.
 func NewCLI(options *types.CLIOptions) *Command {
@@ -22,6 +20,8 @@ func NewCLI(options *types.CLIOptions) *Command {
 	cli := &Command{
 		Command: rootCmd,
 	}
+
+	cli.addManCommand()
 
 	return cli
 }
@@ -118,6 +118,23 @@ func NewCommandCustom(cmd *cobra.Command) *Command {
 	}
 }
 
+func (c *Command) addManCommand() {
+	manCmd := NewCommandRunE(
+		"man",
+		"generate the CLI manpage",
+		"Generate the man page for this command",
+		func(cmd *cobra.Command, args []string) error {
+			d := roff.NewDocument()
+			d.Heading(1, c.Name(), c.Short, time.Now())
+			c.doc(d)
+			fmt.Print(d.String())
+			return nil
+		},
+	)
+
+	c.AddCommand(manCmd)
+}
+
 func (c *Command) doc(d *roff.Document) {
 	c.docName(d)
 	c.docSynopsis(d)
@@ -157,8 +174,10 @@ func (c *Command) docDescription(d *roff.Document) {
 func (c *Command) docOptions(d *roff.Document) {
 	d.SubSection("Options")
 	d.Text(c.Flags().FlagUsages())
-	d.SubSection("Global Options")
-	d.Text(c.Parent().PersistentFlags().FlagUsages())
+	if parent := c.Parent(); parent != nil {
+		d.SubSection("Global Options")
+		d.Text(parent.PersistentFlags().FlagUsages())
+	}
 	d.EndSection()
 }
 func (c *Command) docExamples(d *roff.Document) {
