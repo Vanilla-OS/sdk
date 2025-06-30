@@ -11,7 +11,6 @@ import (
 
 	"github.com/phuslu/log"
 	"github.com/robfig/cron/v3"
-	logsTypes "github.com/vanilla-os/sdk/pkg/v1/logs/types"
 )
 
 // Color codes for different log levels
@@ -74,8 +73,9 @@ func getLogPath() (string, error) {
 //
 //	logger.File.Info().Str("where", "file").Msg("Batman is saving Gotham")
 //	logger.Console.Info().Str("where", "console").Msg("Batman is saving Gotham")
-func NewLogger(domain string) (logsTypes.Logger, error) {
-	vLogger := logsTypes.Logger{}
+func NewLogger(domain string) (Logger, error) {
+	vLogger := Logger{}
+	vLogger.ErrIndex = make(map[string]int)
 
 	// preparing the file logger
 	logPath, err := getLogPath()

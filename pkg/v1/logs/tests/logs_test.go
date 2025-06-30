@@ -29,4 +29,10 @@ func TestNewLogger(t *testing.T) {
 	logger.Term.Info().Msg("Batman reached the console logger")
 
 	logger.File.Info().Str("where", "file").Msg("Batman is saving Gotham")
+
+	rootCtx := logs.NewLogContext("Test", nil)
+	stepCtx := logs.NewLogContext("Step", rootCtx)
+
+	logger.InfoCtx(rootCtx, "Starting test")
+	logger.ErrorCtx(stepCtx, "This is an error")
 }
