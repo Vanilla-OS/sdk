@@ -14,7 +14,6 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.4
-	github.com/vanilla-os/orchid v0.5.0
 	github.com/vorlif/spreak v0.6.0
 	golang.org/x/sys v0.16.0
 	golang.org/x/text v0.14.0

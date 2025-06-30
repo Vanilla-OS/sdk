@@ -354,10 +354,6 @@ github.com/tklauser/go-sysconf v0.3.13 h1:GBUpcahXSpR2xN01jhkNAbTLRk2Yzgggk8IM08
 github.com/tklauser/go-sysconf v0.3.13/go.mod h1:zwleP4Q4OehZHGn4CYZDipCgg9usW5IJePewFCGVEa0=
 github.com/tklauser/numcpus v0.7.0 h1:yjuerZP127QG9m5Zh/mSO4wqurYil27tHrqwRoRjpr4=
 github.com/tklauser/numcpus v0.7.0/go.mod h1:bb6dMVcj8A42tSE7i32fsIUCbQNllK5iDguyOZRUzAY=
-github.com/vanilla-os/orchid v0.5.0 h1:QAOjJ2VcyND5TxK0XYUEu+dysxXicRHhV6i/07S47mk=
-github.com/vanilla-os/orchid v0.5.0/go.mod h1:dNPvHxofO4hEXodEKXp0nLQDZhoHh8evCUXc6X1xLao=
-github.com/vanilla-os/sdk v0.0.0-20240210103031-e14d94619689 h1:kA7D0yuYsTvXcE5ptVEex4rDmQ8tqmXneztyWXlaIvo=
-github.com/vanilla-os/sdk v0.0.0-20240210103031-e14d94619689/go.mod h1:o53W4jRWEOlwnkE4xndU4KnlKAQeOWNLIQqIQ51s3JE=
 github.com/vorlif/spreak v0.6.0 h1:+WrtSGKx9zcZy8d/Tp6t+OA3x9RgmA8TQYPzQ+U7Ddc=
 github.com/vorlif/spreak v0.6.0/go.mod h1:vcqv4dB1XgHpxIXhV5C+8EgqlzKfL37Atj2O/bOB1Bw=
 github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 h1:QldyIu/L63oPpyvQmHgvgickp1Yw510KJOqX7H24mg8=
