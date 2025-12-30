@@ -4,208 +4,124 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/spf13/cobra"
-	"github.com/vanilla-os/sdk/pkg/v1/cli/types"
+	builder "github.com/mirkobrombin/go-cli-builder/v2/pkg/cli"
+	"github.com/mirkobrombin/go-cli-builder/v2/pkg/parser"
 	"github.com/vanilla-os/sdk/pkg/v1/roff"
 )
 
-// NewCLI sets up the CLI for the application using CLIOptions.
-func NewCLI(options *types.CLIOptions) *Command {
-	rootCmd := &cobra.Command{
-		Use:   options.Use,
-		Short: options.Short,
-		Long:  options.Long,
-	}
+// Base is an alias for builder.Base to be used by consumers
+type Base = builder.Base
 
-	cli := &Command{
-		Command: rootCmd,
-	}
-
-	cli.addManCommand()
-
-	return cli
-}
-
-// Command is the root command for the application.
+// Command represents a CLI command.
 type Command struct {
-	*cobra.Command
-	children []*Command
+	Use   string
+	Short string
+	Long  string
+
+	root any
 }
 
-// Children returns the children of the command
-func (c *Command) Children() []*Command {
-	return c.children
+// Name returns the name of the command
+func (c *Command) Name() string {
+	return c.Use
 }
 
-// AddCommand adds a slice of commands to the command
-func (c *Command) AddCommand(commands ...*Command) {
-	c.children = append(c.children, commands...)
-	for _, cmd := range commands {
-		c.Command.AddCommand(cmd.Command)
+// Execute runs the command
+func (c *Command) Execute() error {
+	if c.root == nil {
+		return fmt.Errorf("no root command struct provided. Use NewCommandFromStruct")
 	}
+	return builder.Run(c.root)
 }
 
-// WithBoolFlag adds a boolean flag to the command and
-// registers the flag with environment variable injection
-func (c *Command) WithBoolFlag(f types.BoolFlag) *Command {
-	c.Command.Flags().BoolP(f.Name, f.Shorthand, f.Value, f.Usage)
-	return c
-}
-
-// WithPersistentBoolFlag adds a persistent boolean flag to the command and
-// registers the flag with environment variable injection
-func (c *Command) WithPersistentBoolFlag(f types.BoolFlag) *Command {
-	c.Command.PersistentFlags().BoolP(f.Name, f.Shorthand, f.Value, f.Usage)
-	return c
-}
-
-// WithStringFlag adds a string flag to the command and registers
-// the command with the environment variable injection
-func (c *Command) WithStringFlag(f types.StringFlag) *Command {
-	c.Command.Flags().StringP(f.Name, f.Shorthand, f.Value, f.Usage)
-	return c
-}
-
-// WithPersistentStringFlag adds a persistent string flag to the command and registers
-// the command with the environment variable injection
-func (c *Command) WithPersistentStringFlag(f types.BoolFlag) *Command {
-	c.Command.PersistentFlags().BoolP(f.Name, f.Shorthand, f.Value, f.Usage)
-	return c
-}
-
-// NewCommand returns a new Command with the provided inputs. Alias for
-// NewCommandRunE.
-func NewCommand(use, long, short string, runE func(cmd *cobra.Command, args []string) error) *Command {
-	return NewCommandRunE(use, long, short, runE)
-}
-
-// NewCommandRunE returns a new Command with the provided inputs. The runE function
-// is used for commands that return an error.
-func NewCommandRunE(use, long, short string, runE func(cmd *cobra.Command, args []string) error) *Command {
-	cmd := &cobra.Command{
-		Use:   use,
-		Short: short,
-		Long:  long,
-		RunE:  runE,
+// NewCommandFromStruct returns a new Command created from a struct.
+//
+// Example:
+//
+//	type RootCmd struct {
+//		cli.Base
+//		Poll PollCmd `cmd:"poll" help:"Ask the user preferred hero"`
+//		Man  ManCmd  `cmd:"man" help:"Generate man page"`
+//	}
+//
+//	cmd, err := cli.NewCommandFromStruct(&RootCmd{})
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	err := cmd.Execute()
+func NewCommandFromStruct(s any) (*Command, error) {
+	node, err := parser.Parse(s)
+	if err != nil {
+		return nil, err
 	}
-	return &Command{
-		Command:  cmd,
-		children: make([]*Command, 0),
+
+	c := &Command{
+		Use:   node.Name,
+		Short: node.Description,
+		root:  s,
 	}
+	return c, nil
 }
 
-// NewCommandRun returns a new Command with the provided inputs. The run function
-// is used for commands that do not return an error.
-func NewCommandRun(use, long, short string, run func(cmd *cobra.Command, args []string)) *Command {
-	cmd := &cobra.Command{
-		Use:   use,
-		Short: short,
-		Long:  long,
-		Run:   run,
+// GenerateManPage generates a man page for the declarative struct
+//
+// Example:
+//
+//	type RootCmd struct {
+//		cli.Base
+//		Poll PollCmd `cmd:"poll" help:"Ask the user preferred hero"`
+//		Man  ManCmd  `cmd:"man" help:"Generate man page"`
+//	}
+//
+//	man, err := cli.GenerateManPage(&RootCmd{})
+//	if err != nil {
+//		return "", err
+//	}
+func GenerateManPage(root any) (string, error) {
+	node, err := parser.Parse(root)
+	if err != nil {
+		return "", err
 	}
-	return &Command{
-		Command:  cmd,
-		children: make([]*Command, 0),
-	}
+
+	d := roff.NewDocument()
+	d.Heading(1, node.Name, node.Description, time.Now())
+
+	docNode(d, node)
+
+	return d.String(), nil
 }
 
-// NewCustomCommand returns a Command created from
-// the provided cobra.Command
-func NewCommandCustom(cmd *cobra.Command) *Command {
-	return &Command{
-		Command:  cmd,
-		children: make([]*Command, 0),
-	}
-}
-
-func (c *Command) addManCommand() {
-	manCmd := NewCommandRunE(
-		"man",
-		"generate the CLI manpage",
-		"Generate the man page for this command",
-		func(cmd *cobra.Command, args []string) error {
-			d := roff.NewDocument()
-			d.Heading(1, c.Name(), c.Short, time.Now())
-			c.doc(d)
-			fmt.Print(d.String())
-			return nil
-		},
-	)
-
-	c.AddCommand(manCmd)
-}
-
-func (c *Command) doc(d *roff.Document) {
-	c.docName(d)
-	c.docSynopsis(d)
-	c.docDescription(d)
-	c.docOptions(d)
-	c.docCommands(d)
-	c.docExamples(d)
-}
-
-func (c *Command) docName(d *roff.Document) {
-	d.Section("subcommand " + c.Name())
+// docNode recursively documents a command node and its children.
+func docNode(d *roff.Document, node *parser.CommandNode) {
+	d.Section("subcommand " + node.Name)
 	d.Indent(4)
-	d.Text(c.Short)
-	d.IndentEnd()
-	d.EndSection()
-}
-
-func (c *Command) docSynopsis(d *roff.Document) {
-	d.SubSection("Synopsis")
-	d.Indent(4)
-	d.TextBold(c.Name())
-	d.Text(" [command] [flags] [arguments]")
-	d.IndentEnd()
-	d.EndSection()
-}
-
-func (c *Command) docDescription(d *roff.Document) {
-	d.SubSection("Description")
-	d.Indent(4)
-	d.TaggedParagraph(4)
-	d.Text(c.Long)
+	d.Text(node.Description)
 	d.IndentEnd()
 	d.EndSection()
 
-}
-
-func (c *Command) docOptions(d *roff.Document) {
-	d.SubSection("Options")
-	d.Text(c.Flags().FlagUsages())
-	if parent := c.Parent(); parent != nil {
-		d.SubSection("Global Options")
-		d.Text(parent.PersistentFlags().FlagUsages())
-	}
-	d.EndSection()
-}
-func (c *Command) docExamples(d *roff.Document) {
-	if c.Example == "" {
-		return
-	}
-	d.SubSection("Examples")
-	d.Indent(4)
-	d.Text(c.Example)
-	d.IndentEnd()
-	d.EndSection()
-
-}
-
-func (c *Command) docCommands(d *roff.Document) {
-	if len(c.children) == 0 {
-		return
-	}
-	for _, child := range c.Children() {
-		if child.Hidden {
-			continue
+	// Options
+	if len(node.Flags) > 0 {
+		d.SubSection("Options")
+		for name, meta := range node.Flags {
+			short := ""
+			if meta.Short != "" {
+				short = fmt.Sprintf("-%s, ", meta.Short)
+			}
+			d.Text(fmt.Sprintf("  %s--%s  %s\n", short, name, meta.Description))
 		}
-
-		d.Section(child.Name())
-
-		d.Indent(4)
-
-		d.Text(child.Short + "\n")
-		d.IndentEnd()
+		d.EndSection()
 	}
+
+	// Commands
+	if len(node.Children) > 0 {
+		for _, child := range node.Children {
+			docNode(d, child)
+		}
+	}
+}
+
+// GetRoot returns the underlying root struct of the command.
+func (c *Command) GetRoot() any {
+	return c.root
 }

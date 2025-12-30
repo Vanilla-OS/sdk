@@ -1,23 +1,25 @@
 module github.com/vanilla-os/sdk
 
-go 1.21.1
+go 1.23.4
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/godbus/dbus v4.1.0+incompatible
 	github.com/jochenvg/go-udev v0.0.0-20171110120927-d6b62d56d37b
+	github.com/mirkobrombin/go-cli-builder/v2 v2.0.1
 	github.com/phuslu/log v1.0.88
 	github.com/pterm/pterm v0.12.51
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sergi/go-diff v1.3.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
-	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.4
 	github.com/vorlif/spreak v0.6.0
 	golang.org/x/sys v0.16.0
 	golang.org/x/text v0.14.0
 )
+
+require github.com/mirkobrombin/go-struct-flags v1.0.1
 
 require (
 	atomicgo.dev/cursor v0.1.1 // indirect
@@ -28,7 +30,6 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/gookit/color v1.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jkeiser/iter v0.0.0-20200628201005-c8aa0ae784d1 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/lithammer/fuzzysearch v1.1.5 // indirect
@@ -45,7 +46,7 @@ require (
 	github.com/spf13/afero v1.9.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
 	github.com/tklauser/numcpus v0.7.0 // indirect

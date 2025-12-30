@@ -8,7 +8,6 @@ import (
 
 	"github.com/vanilla-os/sdk/pkg/v1/app/types"
 	"github.com/vanilla-os/sdk/pkg/v1/cli"
-	cliTypes "github.com/vanilla-os/sdk/pkg/v1/cli/types"
 	"github.com/vanilla-os/sdk/pkg/v1/i18n"
 	"github.com/vanilla-os/sdk/pkg/v1/logs"
 	"github.com/vorlif/spreak"
@@ -29,7 +28,7 @@ type App struct {
 	Version string
 
 	// Log is the logger for the application
-	Log logs.Logger
+	Log *logs.Logger
 
 	// LC (Localizer) is the localizer for the application
 	LC spreak.Localizer
@@ -89,7 +88,7 @@ func NewApp(options types.AppOptions) (*App, error) {
 	if err != nil {
 		return &app, err // logger is mandatory for each application
 	}
-	app.Log = logger
+	app.Log = &logger
 
 	// here we prepare a localizer for the application
 	localizer, err := i18n.NewLocalizer(options.LocalesFS, app.RDNN, options.DefaultLocale)
@@ -100,17 +99,23 @@ func NewApp(options types.AppOptions) (*App, error) {
 	return &app, nil
 }
 
-// WithCLI adds a command line interface to the application
+// WithCLI assigns a command created from a struct (declarative model) to the application CLI.
 //
 // Example:
 //
-//	app.WithCLI(&cli.CLIOptions{
-//		Use: "batsignal",
-//		Short: "A simple CLI to call Batman",
-//		Long: "A simple CLI to call Batman using the BatSignal",
-//	})
-func (app *App) WithCLI(options *cliTypes.CLIOptions) {
-	app.CLI = cli.NewCLI(options)
+//	root := &RootCmd{
+//		Poll: PollCmd{},
+//		Man:  ManCmd{},
+//	}
+//	app.WithCLI(root)
+//	app.CLI.Execute()
+func (app *App) WithCLI(root any) error {
+	cmd, err := cli.NewCommandFromStruct(root)
+	if err != nil {
+		return err
+	}
+	app.CLI = cmd
+	return nil
 }
 
 // generateAppSign generates a unique signature for the application
