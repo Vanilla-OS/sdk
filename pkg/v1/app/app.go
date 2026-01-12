@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/fs"
+	"os"
 
 	"github.com/vanilla-os/sdk/pkg/v1/app/types"
 	"github.com/vanilla-os/sdk/pkg/v1/cli"
@@ -91,7 +92,21 @@ func NewApp(options types.AppOptions) (*App, error) {
 	app.Log = &logger
 
 	// here we prepare a localizer for the application
-	localizer, err := i18n.NewLocalizer(options.LocalesFS, app.RDNN, options.DefaultLocale)
+	locale := os.Getenv("LANGUAGE")
+	if locale == "" {
+		locale = os.Getenv("LC_ALL")
+	}
+	if locale == "" {
+		locale = os.Getenv("LC_MESSAGES")
+	}
+	if locale == "" {
+		locale = os.Getenv("LANG")
+	}
+	if locale == "" {
+		locale = options.DefaultLocale
+	}
+
+	localizer, err := i18n.NewLocalizer(options.LocalesFS, app.RDNN, locale)
 	if err != nil {
 		return &app, err
 	}

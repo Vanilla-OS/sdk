@@ -59,3 +59,68 @@ func (l *Logger) ErrorCtx(ctx *LogContext, msg string) {
 	l.File.Error().Msg(formatted)
 	l.Term.Error().Msg(formatted)
 }
+
+// Info logs an informational message to both console and file.
+func (l *Logger) Info(msg string) {
+	l.File.Info().Msg(msg)
+	l.Term.Info().Msg(msg)
+}
+
+// Infof logs a formatted informational message to both console and file.
+func (l *Logger) Infof(format string, v ...any) {
+	msg := fmt.Sprintf(format, v...)
+	l.File.Info().Msg(msg)
+	l.Term.Info().Msg(msg)
+}
+
+// Warn logs a warning message to both console and file.
+func (l *Logger) Warn(msg string) {
+	l.File.Warn().Msg(msg)
+	l.Term.Warn().Msg(msg)
+}
+
+// Warnf logs a formatted warning message to both console and file.
+func (l *Logger) Warnf(format string, v ...any) {
+	msg := fmt.Sprintf(format, v...)
+	l.File.Warn().Msg(msg)
+	l.Term.Warn().Msg(msg)
+}
+
+// Error logs an error message to both console and file.
+func (l *Logger) Error(msg string) {
+	l.File.Error().Msg(msg)
+	l.Term.Error().Msg(msg)
+}
+
+// Errorf logs a formatted error message to both console and file.
+func (l *Logger) Errorf(format string, v ...any) {
+	msg := fmt.Sprintf(format, v...)
+	l.File.Error().Msg(msg)
+	l.Term.Error().Msg(msg)
+}
+
+// Debug logs a debug message to both console and file.
+func (l *Logger) Debug(msg string) {
+	l.File.Debug().Msg(msg)
+	l.Term.Debug().Msg(msg)
+}
+
+// Debugf logs a formatted debug message to both console and file.
+func (l *Logger) Debugf(format string, v ...any) {
+	msg := fmt.Sprintf(format, v...)
+	l.File.Debug().Msg(msg)
+	l.Term.Debug().Msg(msg)
+}
+
+// Trace logs a trace message to both console and file.
+func (l *Logger) Trace(msg string) {
+	l.File.Trace().Msg(msg)
+	l.Term.Trace().Msg(msg)
+}
+
+// Tracef logs a formatted trace message to both console and file.
+func (l *Logger) Tracef(format string, v ...any) {
+	msg := fmt.Sprintf(format, v...)
+	l.File.Trace().Msg(msg)
+	l.Term.Trace().Msg(msg)
+}
