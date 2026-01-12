@@ -197,10 +197,10 @@ github.com/mattn/go-runewidth v0.0.15 h1:UNAjwbU9l54TA3KzvqLGxwWjHmMgBUVhBiTjelZ
 github.com/mattn/go-runewidth v0.0.15/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b h1:j7+1HpAFS1zy5+Q4qx1fWh90gTKwiN4QCGoY9TWyyO4=
 github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b/go.mod h1:01TrycV0kFyexm33Z7vhZRXopbI8J3TDReVlkTgMUxE=
-github.com/mirkobrombin/go-cli-builder/v2 v2.0.1 h1:e2dSNL4kTqEZtpuE6E/nWciG9QlQU9ABexIRfld8TOM=
-github.com/mirkobrombin/go-cli-builder/v2 v2.0.1/go.mod h1:S7PW3egxV9NPw3yM3ZVv1YowHMWOy+g26mjWc51j2gM=
-github.com/mirkobrombin/go-struct-flags v1.0.1 h1:fWqsSqhiHgBVOVxxvoZHNIVfOni1LHTatHkNzr7jp/0=
-github.com/mirkobrombin/go-struct-flags v1.0.1/go.mod h1:G9m7ZJ4EMuc6Dtd9y/JnEnecA44YohDFLPZlx58MLUU=
+github.com/mirkobrombin/go-cli-builder/v2 v2.0.4 h1:rGVT7R1PVgkC9CPkObwdI2nuJXingadB09yfrYFK+pA=
+github.com/mirkobrombin/go-cli-builder/v2 v2.0.4/go.mod h1:Lcy2HVKneI5bbe4ce0JPigt4ozab/RMGOnKDW3j0hRU=
+github.com/mirkobrombin/go-struct-flags/v2 v2.0.0 h1:w76IiGMsQaneMudKdvOYXplxF5Ddlt3Lq8BpBXJtuP4=
+github.com/mirkobrombin/go-struct-flags/v2 v2.0.0/go.mod h1:qQE/RX3VQWrtDCYhCeBGEFB6AalVCzN1DNja3xXnH5k=
 github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/pelletier/go-toml v1.9.5 h1:4yBQzkHv+7BHq2PQUZF3Mx0IYxG7LsP222s7Agd3ve8=

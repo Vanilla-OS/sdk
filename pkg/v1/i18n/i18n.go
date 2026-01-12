@@ -1,8 +1,8 @@
 package i18n
 
 import (
-	"embed"
 	"fmt"
+	"io/fs"
 	"strings"
 
 	"github.com/vorlif/spreak"
@@ -23,7 +23,8 @@ import (
 //		return
 //	}
 //	fmt.Println(t.Get("I am Batman!"))
-func NewLocalizer(localeFS embed.FS, defaultDomain string, locale string) (*spreak.Localizer, error) {
+//	fmt.Println(t.Get("I am Batman!"))
+func NewLocalizer(localeFS fs.FS, defaultDomain string, locale string) (*spreak.Localizer, error) {
 	foundLocale, err := language.Parse(locale)
 	if err != nil {
 		foundLocale = language.English
@@ -31,7 +32,7 @@ func NewLocalizer(localeFS embed.FS, defaultDomain string, locale string) (*spre
 
 	// we need to get the supported languages from the locales file system
 	// to do so we expect a LINGUAS file to be present
-	linguas, err := localeFS.ReadFile("locales/LINGUAS")
+	linguas, err := fs.ReadFile(localeFS, "LINGUAS")
 	if err != nil {
 		return nil, fmt.Errorf("no LINGUAS file found: %v", err)
 	}
@@ -48,9 +49,13 @@ func NewLocalizer(localeFS embed.FS, defaultDomain string, locale string) (*spre
 	// we need to create a new bundle for the localizer, here we use the RDNN
 	// as the default localizer domain
 	bundle, err := spreak.NewBundle(
-		spreak.WithSourceLanguage(language.English),
+		spreak.WithSourceLanguage(language.MustParse("qaa")),
 		spreak.WithDefaultDomain(defaultDomain),
-		spreak.WithDomainFs(defaultDomain, localeFS),
+		spreak.WithFilesystemLoader(defaultDomain,
+			spreak.WithFs(localeFS),
+			spreak.WithPoDecoder(),
+			spreak.WithMoDecoder(),
+		),
 		spreak.WithRequiredLanguage(foundLocale),
 		spreak.WithLanguage(supportedLanguages...),
 	)

@@ -1,7 +1,7 @@
 package types
 
 import (
-	"embed"
+	"io/fs"
 
 	cliTypes "github.com/vanilla-os/sdk/pkg/v1/cli/types"
 )
@@ -23,7 +23,7 @@ type AppOptions struct {
 	Version string
 
 	// LocalesFS is the file system containing the locales for the application
-	LocalesFS embed.FS
+	LocalesFS fs.FS
 
 	// DefaultLocale is the default locale for the application, this should
 	// always be empty unless you want to force a specific locale for the

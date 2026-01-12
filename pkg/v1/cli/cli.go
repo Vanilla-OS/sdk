@@ -5,6 +5,7 @@ import (
 	"time"
 
 	builder "github.com/mirkobrombin/go-cli-builder/v2/pkg/cli"
+	"github.com/mirkobrombin/go-cli-builder/v2/pkg/help"
 	"github.com/mirkobrombin/go-cli-builder/v2/pkg/parser"
 	"github.com/vanilla-os/sdk/pkg/v1/roff"
 )
@@ -19,6 +20,7 @@ type Command struct {
 	Long  string
 
 	root any
+	app  *builder.App
 }
 
 // Name returns the name of the command
@@ -28,10 +30,30 @@ func (c *Command) Name() string {
 
 // Execute runs the command
 func (c *Command) Execute() error {
-	if c.root == nil {
-		return fmt.Errorf("no root command struct provided. Use NewCommandFromStruct")
+	if c.app == nil {
+		return fmt.Errorf("no application initialized. Use NewCommandFromStruct")
 	}
-	return builder.Run(c.root)
+	return c.app.Run()
+}
+
+// AddCommand adds a dynamic command to the application.
+func (c *Command) AddCommand(name string, cmd *parser.CommandNode) {
+	c.app.AddCommand(name, cmd)
+}
+
+// SetTranslator sets the translator for the application.
+func (c *Command) SetTranslator(tr help.Translator) {
+	c.app.SetTranslator(tr)
+}
+
+// SetName sets the name of the root command.
+func (c *Command) SetName(name string) {
+	c.app.SetName(name)
+}
+
+// Reload re-parses the root struct to pick up dynamic changes.
+func (c *Command) Reload() error {
+	return c.app.Reload()
 }
 
 // NewCommandFromStruct returns a new Command created from a struct.
@@ -51,15 +73,18 @@ func (c *Command) Execute() error {
 //
 //	err := cmd.Execute()
 func NewCommandFromStruct(s any) (*Command, error) {
-	node, err := parser.Parse(s)
+	app, err := builder.New(s)
 	if err != nil {
 		return nil, err
 	}
+
+	node := app.RootNode
 
 	c := &Command{
 		Use:   node.Name,
 		Short: node.Description,
 		root:  s,
+		app:   app,
 	}
 	return c, nil
 }
@@ -79,7 +104,7 @@ func NewCommandFromStruct(s any) (*Command, error) {
 //		return "", err
 //	}
 func GenerateManPage(root any) (string, error) {
-	node, err := parser.Parse(root)
+	node, err := parser.Parse("root", root)
 	if err != nil {
 		return "", err
 	}

@@ -2,9 +2,9 @@ package app
 
 import (
 	"crypto/sha1"
-	"embed"
 	"encoding/base64"
 	"fmt"
+	"io/fs"
 
 	"github.com/vanilla-os/sdk/pkg/v1/app/types"
 	"github.com/vanilla-os/sdk/pkg/v1/cli"
@@ -34,7 +34,7 @@ type App struct {
 	LC spreak.Localizer
 
 	// LocalesFS is the file system containing the locales for the application
-	LocalesFS embed.FS
+	LocalesFS fs.FS
 
 	// CLI is the command line interface for the application
 	CLI *cli.Command
@@ -92,9 +92,10 @@ func NewApp(options types.AppOptions) (*App, error) {
 
 	// here we prepare a localizer for the application
 	localizer, err := i18n.NewLocalizer(options.LocalesFS, app.RDNN, options.DefaultLocale)
-	if err == nil {
-		app.LC = *localizer
-	} // something went wrong, perhaps the FS is not provided
+	if err != nil {
+		return &app, err
+	}
+	app.LC = *localizer
 
 	return &app, nil
 }

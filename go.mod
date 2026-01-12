@@ -6,7 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/godbus/dbus v4.1.0+incompatible
 	github.com/jochenvg/go-udev v0.0.0-20171110120927-d6b62d56d37b
-	github.com/mirkobrombin/go-cli-builder/v2 v2.0.1
+	github.com/mirkobrombin/go-cli-builder/v2 v2.0.4
 	github.com/phuslu/log v1.0.88
 	github.com/pterm/pterm v0.12.51
 	github.com/robfig/cron/v3 v3.0.1
@@ -18,8 +18,6 @@ require (
 	golang.org/x/sys v0.16.0
 	golang.org/x/text v0.14.0
 )
-
-require github.com/mirkobrombin/go-struct-flags v1.0.1
 
 require (
 	atomicgo.dev/cursor v0.1.1 // indirect
@@ -38,6 +36,7 @@ require (
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
+	github.com/mirkobrombin/go-struct-flags/v2 v2.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
