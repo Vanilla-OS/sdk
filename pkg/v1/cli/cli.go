@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 
 	builder "github.com/mirkobrombin/go-cli-builder/v2/pkg/cli"
@@ -21,6 +22,28 @@ type Command struct {
 
 	root any
 	app  *builder.App
+}
+
+// ManCmd is the command to generate the man page
+type ManCmd struct {
+	Base
+	root any
+}
+
+// Run runs the man command
+//
+// Example:
+//
+//	manCmd := &cli.ManCmd{root: s}
+//	err := parser.Run(manCmd)
+func (c *ManCmd) Run() error {
+	man, err := GenerateManPage(c.root)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(man)
+	return nil
 }
 
 // Name returns the name of the command
@@ -78,6 +101,13 @@ func NewCommandFromStruct(s any) (*Command, error) {
 		return nil, err
 	}
 
+	manCmd := &ManCmd{root: s}
+	manNode, err := parser.Parse("man", manCmd)
+	if err == nil {
+		manNode.Description = "Generate man page"
+		app.AddCommand("man", manNode)
+	}
+
 	node := app.RootNode
 
 	c := &Command{
@@ -103,8 +133,17 @@ func NewCommandFromStruct(s any) (*Command, error) {
 //	if err != nil {
 //		return "", err
 //	}
+//
+// GenerateManPage automatically uses a zero-value instance of the root struct
+// to exclude any dynamic commands.
 func GenerateManPage(root any) (string, error) {
-	node, err := parser.Parse("root", root)
+	t := reflect.TypeOf(root)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	cleanRoot := reflect.New(t).Interface()
+
+	node, err := parser.Parse("root", cleanRoot)
 	if err != nil {
 		return "", err
 	}
