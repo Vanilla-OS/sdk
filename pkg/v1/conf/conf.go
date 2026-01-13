@@ -1,83 +1,135 @@
 package conf
 
+/*	License: GPLv3
+	Authors:
+		Mirko Brombin <brombin94@gmail.com>
+		Vanilla OS Contributors <https://github.com/vanilla-os/>
+	Copyright: 2024
+	Description:
+		Package conf provides a builder for declarative configuration loading with support for cascading overrides.
+*/
+
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
 	"os/user"
 	"path/filepath"
-	"strings"
 
-	"github.com/spf13/viper"
 	"github.com/vanilla-os/sdk/pkg/v1/conf/types"
 )
 
-// InitConfig initializes a viper configuration and returns a pointer to the
-// configuration struct.
-//
-// Example:
-//
-//	confStruct := conf.ConfigStruct{
-//		Place:    "Gotham",
-//		Event:    "Joker's Robbery",
-//		Duration: 24,
-//	}
-//
-//	opts := types.ConfigOptions{
-//		Domain: "org.gotham.events",
-//		Prefix: "/tmp",
-//		Type:   "yml",
-//	}
-//
-//	config, err := conf.InitConfig[conf.ConfigStruct](opts)
-//	if err != nil {
-//		fmt.Printf("error initializing config: %v", err)
-//	}
-//
-//	fmt.Printf("The event %s at %s will last for %d hours", config.Event, config.Place, config.Duration)
-func InitConfig[T any](opts types.ConfigOptions) (*T, error) {
+// Builder is a builder for configuration loading.
+type Builder[T any] struct {
+	domain    string
+	confType  string
+	prefix    string
+	cascading bool
+}
+
+// NewBuilder creates a new configuration builder for the given domain.
+func NewBuilder[T any](domain string) *Builder[T] {
+	return &Builder[T]{
+		domain:    domain,
+		cascading: true,
+	}
+}
+
+// WithType sets the configuration file type (e.g. "json").
+func (b *Builder[T]) WithType(t string) *Builder[T] {
+	b.confType = t
+	return b
+}
+
+// WithPrefix sets the prefix for the configuration paths (mostly for testing).
+func (b *Builder[T]) WithPrefix(p string) *Builder[T] {
+	b.prefix = p
+	return b
+}
+
+// WithCascading configures whether to load configurations in a cascading manner
+// (System -> User -> Local), merging them. If false, it stops at the first
+// configuration found (Local -> User -> System). Default is true.
+func (b *Builder[T]) WithCascading(enable bool) *Builder[T] {
+	b.cascading = enable
+	return b
+}
+
+// Build loads the configuration and returns it.
+func (b *Builder[T]) Build() (*T, error) {
+	if b.confType == "" {
+		b.confType = "json"
+	}
+	if b.confType != "json" {
+		return nil, fmt.Errorf("unsupported config type: %s", b.confType)
+	}
+
 	var config T
+	paths := b.getOrderedPaths()
+	loaded := false
 
-	configPaths := buildConfigPaths(opts.Prefix, opts.Domain, opts.Type)
-	for _, path := range configPaths {
-		viper.AddConfigPath(path)
-	}
-
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	viper.SetConfigName("config")
-	if opts.Type != "" {
-		viper.SetConfigType(opts.Type)
+	if b.cascading {
+		for _, dir := range paths {
+			path := filepath.Join(dir, "config."+b.confType)
+			if err := loadFile(path, &config); err == nil {
+				loaded = true
+			}
+		}
 	} else {
-		viper.SetConfigType("yaml")
+		for i := len(paths) - 1; i >= 0; i-- {
+			dir := paths[i]
+			path := filepath.Join(dir, "config."+b.confType)
+			if err := loadFile(path, &config); err == nil {
+				loaded = true
+				break
+			}
+		}
 	}
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	err = viper.Unmarshal(&config)
-	if err != nil {
-		return nil, err
+	if !loaded {
+		return nil, errors.New("no configuration file found")
 	}
 
 	return &config, nil
 }
 
-// buildConfigPaths returns a list of paths where the configuration file might
-// be located, in order of priority.
-func buildConfigPaths(prefix, domain, fileType string) []string {
-	user, err := user.Current()
+func (b *Builder[T]) getOrderedPaths() []string {
+	paths := []string{
+		filepath.Join(b.prefix, "/usr/share", b.domain),
+		filepath.Join(b.prefix, "/etc", b.domain),
+	}
+
+	u, err := user.Current()
+	if err == nil {
+		paths = append(paths, filepath.Join(b.prefix, u.HomeDir, b.domain))
+
+		configHome := os.Getenv("XDG_CONFIG_HOME")
+		if configHome == "" {
+			configHome = filepath.Join(u.HomeDir, ".config")
+		}
+		paths = append(paths, filepath.Join(b.prefix, configHome, b.domain))
+	}
+
+	paths = append(paths, filepath.Join(".", "conf", b.domain))
+
+	return paths
+}
+
+func loadFile(path string, v any) error {
+	f, err := os.Open(path)
 	if err != nil {
-		return []string{}
+		return err
 	}
-	userDir := user.HomeDir
+	defer f.Close()
+	return json.NewDecoder(f).Decode(v)
+}
 
-	configPaths := []string{
-		filepath.Join(".", "conf", domain),
-		filepath.Join(prefix, userDir, domain),
-		filepath.Join(prefix, "/etc", domain),
-		filepath.Join(prefix, "/usr/share", domain),
-	}
-
-	return configPaths
+// InitConfig is a compatibility wrapper using the new Builder.
+// Deprecated: Use NewBuilder instead.
+func InitConfig[T any](opts types.ConfigOptions) (*T, error) {
+	return NewBuilder[T](opts.Domain).
+		WithType(opts.Type).
+		WithPrefix(opts.Prefix).
+		Build()
 }
