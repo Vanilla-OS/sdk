@@ -22,21 +22,21 @@ func TestInitConfig(t *testing.T) {
 	opts := types.ConfigOptions{
 		Domain: "org.vanillaos.sdk.conf-test",
 		Prefix: dir,
-		Type:   "yml",
+		Type:   "json",
 	}
 
-	filePath := filepath.Join(dir, "/etc", opts.Domain, "config.yaml")
+	filePath := filepath.Join(dir, "/etc", opts.Domain, "config.json")
 
 	err := os.MkdirAll(filepath.Dir(filePath), 0755)
 	if err != nil {
 		t.Errorf("error creating directory: %v", err)
 	}
 
-	content := []byte(`
-place: Gotham
-event: Joker's Robbery
-duration: 24
-`)
+	content := []byte(`{
+"place": "Gotham",
+"event": "Joker's Robbery",
+"duration": 24
+}`)
 	err = os.WriteFile(filePath, content, 0644)
 	if err != nil {
 		t.Errorf("error writing file: %v", err)
@@ -45,6 +45,7 @@ duration: 24
 	config, err := conf.InitConfig[ConfigStruct](opts)
 	if err != nil {
 		t.Errorf("error initializing config: %v", err)
+		return
 	}
 
 	assert.Equal(t, "Gotham", config.Place)

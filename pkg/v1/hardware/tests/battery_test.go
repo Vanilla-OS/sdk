@@ -2,6 +2,7 @@ package tests
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/vanilla-os/sdk/pkg/v1/hardware"
@@ -10,6 +11,10 @@ import (
 func TestGetBatteryStats(t *testing.T) {
 	batteryStats, err := hardware.GetBatteryStats()
 	if err != nil {
+		if strings.Contains(err.Error(), "no such file or directory") {
+			t.Skipf("Skipping test due to missing battery files: %v", err)
+			return
+		}
 		t.Errorf("Error: %v", err)
 		return
 	}
@@ -28,6 +33,10 @@ func TestGetBatteryStats(t *testing.T) {
 func TestGetBatteryHealth(t *testing.T) {
 	batteryStats, err := hardware.GetBatteryStats()
 	if err != nil {
+		if strings.Contains(err.Error(), "no such file or directory") {
+			t.Skipf("Skipping test due to missing battery files: %v", err)
+			return
+		}
 		t.Errorf("Error: %v", err)
 		return
 	}

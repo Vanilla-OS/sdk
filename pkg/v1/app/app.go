@@ -106,11 +106,18 @@ func NewApp(options types.AppOptions) (*App, error) {
 		locale = options.DefaultLocale
 	}
 
-	localizer, err := i18n.NewLocalizer(options.LocalesFS, app.RDNN, locale)
-	if err != nil {
-		return &app, err
+	var localizer *spreak.Localizer
+	if options.LocalesFS != nil {
+		var err error
+		localizer, err = i18n.NewLocalizer(options.LocalesFS, app.RDNN, locale)
+		if err != nil {
+			return &app, err
+		}
 	}
-	app.LC = *localizer
+
+	if localizer != nil {
+		app.LC = *localizer
+	}
 
 	return &app, nil
 }
