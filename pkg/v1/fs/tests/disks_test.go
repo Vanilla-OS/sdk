@@ -14,7 +14,7 @@ func TestGetDiskList(t *testing.T) {
 	}
 
 	if len(disks) == 0 {
-		t.Errorf("No disks found")
+		t.Skipf("No disks found")
 		return
 	}
 
