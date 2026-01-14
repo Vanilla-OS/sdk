@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	builder "github.com/mirkobrombin/go-cli-builder/v2/pkg/cli"
@@ -20,14 +21,16 @@ type Command struct {
 	Short string
 	Long  string
 
-	root any
-	app  *builder.App
+	root   any
+	app    *builder.App
+	manCmd *ManCmd
 }
 
 // ManCmd is the command to generate the man page
 type ManCmd struct {
 	Base
-	root any
+	root       any
+	translator help.Translator
 }
 
 // Run runs the man command
@@ -37,7 +40,7 @@ type ManCmd struct {
 //	manCmd := &cli.ManCmd{root: s}
 //	err := parser.Run(manCmd)
 func (c *ManCmd) Run() error {
-	man, err := GenerateManPage(c.root)
+	man, err := GenerateManPage(c.root, c.translator)
 	if err != nil {
 		return err
 	}
@@ -67,6 +70,9 @@ func (c *Command) AddCommand(name string, cmd *parser.CommandNode) {
 // SetTranslator sets the translator for the application.
 func (c *Command) SetTranslator(tr help.Translator) {
 	c.app.SetTranslator(tr)
+	if c.manCmd != nil {
+		c.manCmd.translator = tr
+	}
 }
 
 // SetName sets the name of the root command.
@@ -101,6 +107,7 @@ func NewCommandFromStruct(s any) (*Command, error) {
 		return nil, err
 	}
 
+	// We inject the man command
 	manCmd := &ManCmd{root: s}
 	manNode, err := parser.Parse("man", manCmd)
 	if err == nil {
@@ -111,10 +118,11 @@ func NewCommandFromStruct(s any) (*Command, error) {
 	node := app.RootNode
 
 	c := &Command{
-		Use:   node.Name,
-		Short: node.Description,
-		root:  s,
-		app:   app,
+		Use:    node.Name,
+		Short:  node.Description,
+		root:   s,
+		app:    app,
+		manCmd: manCmd,
 	}
 	return c, nil
 }
@@ -129,14 +137,14 @@ func NewCommandFromStruct(s any) (*Command, error) {
 //		Man  ManCmd  `cmd:"man" help:"Generate man page"`
 //	}
 //
-//	man, err := cli.GenerateManPage(&RootCmd{})
+//	man, err := cli.GenerateManPage(&RootCmd{}, nil)
 //	if err != nil {
 //		return "", err
 //	}
 //
 // GenerateManPage automatically uses a zero-value instance of the root struct
 // to exclude any dynamic commands.
-func GenerateManPage(root any) (string, error) {
+func GenerateManPage(root any, tr help.Translator) (string, error) {
 	t := reflect.TypeOf(root)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -148,19 +156,29 @@ func GenerateManPage(root any) (string, error) {
 		return "", err
 	}
 
-	d := roff.NewDocument()
-	d.Heading(1, node.Name, node.Description, time.Now())
+	description := node.Description
+	if tr != nil {
+		description = tr(cleanKey(description))
+	}
 
-	docNode(d, node)
+	d := roff.NewDocument()
+	d.Heading(1, node.Name, description, time.Now())
+
+	docNode(d, node, tr)
 
 	return d.String(), nil
 }
 
 // docNode recursively documents a command node and its children.
-func docNode(d *roff.Document, node *parser.CommandNode) {
+func docNode(d *roff.Document, node *parser.CommandNode, tr help.Translator) {
+	description := node.Description
+	if tr != nil {
+		description = tr(cleanKey(description))
+	}
+
 	d.Section("subcommand " + node.Name)
 	d.Indent(4)
-	d.Text(node.Description)
+	d.Text(description)
 	d.IndentEnd()
 	d.EndSection()
 
@@ -172,7 +190,11 @@ func docNode(d *roff.Document, node *parser.CommandNode) {
 			if meta.Short != "" {
 				short = fmt.Sprintf("-%s, ", meta.Short)
 			}
-			d.Text(fmt.Sprintf("  %s--%s  %s\n", short, name, meta.Description))
+			desc := meta.Description
+			if tr != nil {
+				desc = tr(cleanKey(desc))
+			}
+			d.Text(fmt.Sprintf("  %s--%s  %s\n", short, name, desc))
 		}
 		d.EndSection()
 	}
@@ -180,9 +202,16 @@ func docNode(d *roff.Document, node *parser.CommandNode) {
 	// Commands
 	if len(node.Children) > 0 {
 		for _, child := range node.Children {
-			docNode(d, child)
+			docNode(d, child, tr)
 		}
 	}
+}
+
+func cleanKey(key string) string {
+	if strings.HasPrefix(key, "pr:") {
+		return strings.TrimPrefix(key, "pr:")
+	}
+	return key
 }
 
 // GetRoot returns the underlying root struct of the command.
