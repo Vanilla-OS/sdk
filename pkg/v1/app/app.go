@@ -119,6 +119,8 @@ func NewApp(options types.AppOptions) (*App, error) {
 		app.LC = *localizer
 	}
 
+	app.checkMissingStrings()
+
 	return &app, nil
 }
 
