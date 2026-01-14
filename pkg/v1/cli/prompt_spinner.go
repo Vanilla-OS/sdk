@@ -4,7 +4,7 @@ package cli
 	Authors:
 		Mirko Brombin <brombin94@gmail.com>
 		Vanilla OS Contributors <https://github.com/vanilla-os/>
-	Copyright: 2024
+	Copyright: 2026
 	Description: Spinner prompt implementation using Bubble Tea (spinner).
 */
 

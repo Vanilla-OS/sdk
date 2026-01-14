@@ -4,7 +4,7 @@ package conf
 	Authors:
 		Mirko Brombin <brombin94@gmail.com>
 		Vanilla OS Contributors <https://github.com/vanilla-os/>
-	Copyright: 2024
+	Copyright: 2026
 	Description:
 		Package conf provides a builder for declarative configuration loading with support for cascading overrides.
 */

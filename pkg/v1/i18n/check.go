@@ -1,5 +1,13 @@
 package i18n
 
+/*	License: GPLv3
+	Authors:
+		Mirko Brombin <brombin94@gmail.com>
+		Vanilla OS Contributors <https://github.com/vanilla-os/>
+	Copyright: 2026
+	Description: Vanilla OS SDK component.
+*/
+
 import (
 	"bufio"
 	"fmt"
@@ -51,6 +59,7 @@ func CheckMissingStrings(rootPath string, localeFile string) (map[string][]strin
 	}
 
 	sourceRe := regexp.MustCompile(`\.Trans\("([\S.]+)"`)
+	prRe := regexp.MustCompile(`pr:([\w\.]+)`)
 	missing := make(map[string][]string)
 
 	err = filepath.WalkDir(rootPath, func(path string, d fs.DirEntry, err error) error {
@@ -73,6 +82,7 @@ func CheckMissingStrings(rootPath string, localeFile string) (map[string][]strin
 		}
 
 		matches := sourceRe.FindAllStringSubmatch(string(content), -1)
+		matches = append(matches, prRe.FindAllStringSubmatch(string(content), -1)...)
 		for _, match := range matches {
 			if len(match) < 2 {
 				continue

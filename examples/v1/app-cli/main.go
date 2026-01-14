@@ -23,7 +23,9 @@ type ManCmd struct {
 }
 
 func (c *ManCmd) Run() error {
-	man, err := cli.GenerateManPage(&RootCmd{})
+	man, err := cli.GenerateManPage(&RootCmd{}, func(key string) string {
+		return key
+	})
 	if err != nil {
 		return err
 	}

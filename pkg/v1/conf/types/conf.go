@@ -1,5 +1,13 @@
 package types
 
+/*	License: GPLv3
+	Authors:
+		Mirko Brombin <brombin94@gmail.com>
+		Vanilla OS Contributors <https://github.com/vanilla-os/>
+	Copyright: 2026
+	Description: Vanilla OS SDK component.
+*/
+
 // ConfigOptions is a struct that holds the configuration options
 type ConfigOptions struct {
 	// Domain is the domain of the configuration file, in the context of a
