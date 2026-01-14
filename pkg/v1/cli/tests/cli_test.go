@@ -28,7 +28,9 @@ func TestDeclarativeCLI(t *testing.T) {
 	// but we can ensure structural setup is correct.
 
 	// Check man page generation
-	man, err := cli.GenerateManPage(&TestCmd{})
+	man, err := cli.GenerateManPage(&TestCmd{}, func(key string) string {
+		return key
+	})
 	if err != nil {
 		t.Errorf("Failed to generate man page: %v", err)
 	}
