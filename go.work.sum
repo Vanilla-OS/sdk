@@ -118,6 +118,10 @@ github.com/mirkobrombin/go-cli-builder/v2 v2.0.1 h1:e2dSNL4kTqEZtpuE6E/nWciG9QlQ
 github.com/mirkobrombin/go-cli-builder/v2 v2.0.1/go.mod h1:S7PW3egxV9NPw3yM3ZVv1YowHMWOy+g26mjWc51j2gM=
 github.com/mirkobrombin/go-cli-builder/v2 v2.0.3 h1:60krbar3QvpLqwlxhbVsk5hISKp8P2XSqb40xq+YqyA=
 github.com/mirkobrombin/go-cli-builder/v2 v2.0.3/go.mod h1:Lcy2HVKneI5bbe4ce0JPigt4ozab/RMGOnKDW3j0hRU=
+github.com/mirkobrombin/go-cli-builder/v2 v2.0.5 h1:ASWEhdH5sPUVVQ9OC/1uuDLPvglBqy8JMcw0YojvSIo=
+github.com/mirkobrombin/go-cli-builder/v2 v2.0.5/go.mod h1:jqg09VyejIcNMrGSz4zflb1VO1dOZ6h4hKfmGkXv110=
+github.com/mirkobrombin/go-foundation v0.2.0 h1:Omfr/ejTus5PCAeiq4tTc3LKzAytnTvuMBeIDfcofTU=
+github.com/mirkobrombin/go-foundation v0.2.0/go.mod h1:ScQBotKzuC5Lxi61Wyw0h8NaeGKsuwp4xHwPj5Mj9DY=
 github.com/mitchellh/cli v1.0.0 h1:iGBIsUe3+HZ/AD/Vd7DErOt5sU9fa8Uj7A2s1aggv1Y=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
