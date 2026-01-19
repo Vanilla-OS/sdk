@@ -32,8 +32,11 @@ func (a *App) checkMissingStrings() {
 	// Try to locate the English locale file in common paths.
 	var localeFile string
 	possiblePaths := []string{
+		"cmd/locales/en/LC_MESSAGES",
 		"cmd/locales/en",
+		"locales/en/LC_MESSAGES",
 		"locales/en",
+		"assets/locales/en/LC_MESSAGES",
 		"assets/locales/en",
 	}
 
@@ -47,7 +50,7 @@ func (a *App) checkMissingStrings() {
 	}
 
 	if localeFile == "" {
-		fmt.Println("Error: Could not find any .po file in standard locations (cmd/locales/en, locales/en, assets/locales/en)")
+		fmt.Println("Error: Could not find any .po file in standard locations")
 		os.Exit(1)
 	}
 
