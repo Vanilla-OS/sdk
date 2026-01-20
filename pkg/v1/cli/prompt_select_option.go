@@ -123,6 +123,9 @@ func (m listModel) View() string {
 //	}
 //	fmt.Printf("You selected %s!\n", selected)
 func (c *Command) SelectOption(prompt string, options []string) (string, error) {
+	if strings.Contains(prompt, "%d") {
+		prompt = fmt.Sprintf(prompt, len(options))
+	}
 	p := tea.NewProgram(initialListModel(prompt, options))
 	m, err := p.Run()
 	if err != nil {
