@@ -97,6 +97,7 @@ func (b *Builder[T]) Build() (*T, error) {
 func (b *Builder[T]) getOrderedPaths() []string {
 	paths := []string{
 		filepath.Join(b.prefix, "/usr/share", b.domain),
+		filepath.Join(b.prefix, "/app/share", b.domain),
 		filepath.Join(b.prefix, "/etc", b.domain),
 	}
 
