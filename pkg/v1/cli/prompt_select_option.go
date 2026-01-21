@@ -85,7 +85,8 @@ func (m listModel) Init() tea.Cmd {
 func (m listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
+		key := msg.String()
+		switch key {
 		case "ctrl+c":
 			m.err = fmt.Errorf("interrupted")
 			return m, tea.Quit
@@ -94,6 +95,15 @@ func (m listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.selected = string(i)
 			}
 			return m, tea.Quit
+		case "1", "2", "3", "4", "5", "6", "7", "8", "9":
+			idx := int(key[0] - '1')
+			items := m.list.Items()
+			if idx >= 0 && idx < len(items) {
+				if i, ok := items[idx].(item); ok {
+					m.selected = string(i)
+					return m, tea.Quit
+				}
+			}
 		}
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
