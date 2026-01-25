@@ -26,6 +26,7 @@ type Builder[T any] struct {
 	confType  string
 	prefix    string
 	cascading bool
+	optional  bool
 }
 
 // NewBuilder creates a new configuration builder for the given domain.
@@ -53,6 +54,14 @@ func (b *Builder[T]) WithPrefix(p string) *Builder[T] {
 // configuration found (Local -> User -> System). Default is true.
 func (b *Builder[T]) WithCascading(enable bool) *Builder[T] {
 	b.cascading = enable
+	return b
+}
+
+// WithOptional configures whether the configuration file is optional. If true,
+// Build will not return an error if no configuration file is found.
+// Default is false.
+func (b *Builder[T]) WithOptional(enable bool) *Builder[T] {
+	b.optional = enable
 	return b
 }
 
@@ -88,6 +97,9 @@ func (b *Builder[T]) Build() (*T, error) {
 	}
 
 	if !loaded {
+		if b.optional {
+			return &config, nil
+		}
 		return nil, errors.New("no configuration file found")
 	}
 
