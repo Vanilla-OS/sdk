@@ -9,11 +9,8 @@ package fs
 */
 
 import (
-	"bufio"
 	"fmt"
 	"os"
-	"os/exec"
-	"strings"
 	"syscall"
 )
 
@@ -29,20 +26,15 @@ import (
 //	}
 //	fmt.Printf("/tmp is mounted: %v", mounted)
 func IsMounted(source string, destination string) (bool, error) {
-	mounts, err := os.Open("/proc/mounts")
+	entries, err := GetMountInfo()
 	if err != nil {
-		return false, fmt.Errorf("error opening /proc/mounts: %w", err)
+		return false, err
 	}
-	defer mounts.Close()
-
-	scanner := bufio.NewScanner(mounts)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.Contains(line, source) && strings.Contains(line, destination) {
+	for _, e := range entries {
+		if e.Source == source && e.MountPoint == destination {
 			return true, nil
 		}
 	}
-
 	return false, nil
 }
 
@@ -150,20 +142,18 @@ func MountOverlay(lowerDir, upperDir, workDir string) error {
 //		fmt.Printf("Error fuse-overlayfs mounting /batman: %v", err)
 //		return
 //	}
-func MountFuseOverlay(targetDir, lowerDir, upperDir, workDir string) (err error) {
-	// TODO: Replace the command-line tool with a Go library, if available.
-	c := exec.Command(
-		"fuse-overlayfs",
+func MountFuseOverlay(targetDir, lowerDir, upperDir, workDir string) error {
+	// Note: implemented via kernel overlayfs to avoid spawning external commands.
+	return Mount(
+		"overlay",
 		targetDir,
-		"-o",
+		"overlay",
 		fmt.Sprintf(
-			"lowerdir=%s,upperdir=%s,workdir=%s",
+			"lowerdir=%s,upperdir=%s,workdir=%s,userxattr",
 			lowerDir, upperDir, workDir,
 		),
+		0,
 	)
-	c.Stdout = os.Stdout
-	c.Stderr = os.Stderr
-	return c.Run()
 }
 
 // Unmount unmounts the given path. An error is returned if the path is not
@@ -195,10 +185,6 @@ func Unmount(target string) error {
 //		fmt.Printf("Error fuse-overlayfs unmounting /batman: %v", err)
 //		return
 //	}
-func UnmountFuseOverlay(targetDir string) (err error) {
-	// TODO: Replace the command-line tool with a Go library, if available.
-	c := exec.Command("fusermount", "-u", targetDir)
-	c.Stdout = os.Stdout
-	c.Stderr = os.Stderr
-	return c.Run()
+func UnmountFuseOverlay(targetDir string) error {
+	return Unmount(targetDir)
 }

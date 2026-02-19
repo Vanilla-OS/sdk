@@ -171,6 +171,10 @@ func GetDiskInfo(partitionPath string) (types.BaseInfo, error) {
 	info.UUID = fsInfo["UUID"]
 	info.PARTUUID = fsInfo["PARTUUID"]
 
+	if mp, err := GetMountpoint(partitionPath); err == nil {
+		info.Mountpoint = mp
+	}
+
 	return info, nil
 }
 
